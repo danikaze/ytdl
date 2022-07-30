@@ -36,10 +36,10 @@ if (process.env.NODE_ENV === 'production') {
   sourceMapSupport.install();
 }
 
-const isDebug =
+const IS_DEBUG =
   process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
 
-if (isDebug) {
+if (IS_DEBUG) {
   require('electron-debug')();
 }
 
@@ -57,7 +57,7 @@ const installExtensions = async () => {
 };
 
 const createWindow = async () => {
-  if (isDebug) {
+  if (IS_DEBUG) {
     await installExtensions();
   }
 

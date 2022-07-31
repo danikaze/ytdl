@@ -10,7 +10,7 @@
     "strict": true,
     "pretty": true,
     "sourceMap": true,
-    "baseUrl": "./src",
+    "baseUrl": ".",
     "noUnusedLocals": true,
     "noUnusedParameters": false,
     "noImplicitReturns": true,
@@ -23,7 +23,15 @@
     "outDir": "release/app/dist",
     "noErrorTruncation": true,
     "forceConsistentCasingInFileNames": true,
-    "plugins": [{ "name": "typescript-plugin-css-modules" }]
+    "plugins": [{ "name": "typescript-plugin-css-modules" }],
+    "paths": {
+      "@assets": ["assets"],
+      "@assets/*": ["assets/*"],
+      "@main": ["src/main"],
+      "@main/*": ["src/main/*"],
+      "@renderer": ["src/renderer"],
+      "@renderer/*": ["src/renderer/*"]
+    }
   },
   "exclude": ["test", "release/build", "release/app/dist", ".erb/dll"]
 }

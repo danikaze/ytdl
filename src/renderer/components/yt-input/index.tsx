@@ -1,4 +1,5 @@
-import { FC, useRef } from 'react';
+import { FC, useMemo, useRef } from 'react';
+import { Button, Pane, TextInputField } from 'evergreen-ui';
 
 export interface Props {
   onInput: (url: string) => void;
@@ -6,22 +7,30 @@ export interface Props {
 
 export const YoutubeInput: FC<Props> = ({ onInput }) => {
   const inputRef = useRef<HTMLInputElement>(null);
-  const clickHandler = () => {
-    const value = inputRef.current?.value;
-    if (!value) return;
-    onInput(value);
-  };
+
+  const clickHandler = useMemo(
+    () => () => {
+      const value = inputRef.current?.value;
+      if (!value) return;
+      onInput(value);
+    },
+    [onInput]
+  );
 
   return (
-    <div>
-      <input
-        placeholder="Youtube URL"
+    <Pane display="flex" alignItems="flex-end">
+      <TextInputField
+        label="Youtube URL"
         defaultValue="https://www.youtube.com/watch?v=zyhbEFhLSiw"
+        marginBottom={0}
+        flexGrow={1}
+        marginRight={8}
         ref={inputRef}
       />
-      <button type="button" onClick={clickHandler}>
+
+      <Button type="button" appearance="primary" onClick={clickHandler}>
         Download
-      </button>
-    </div>
+      </Button>
+    </Pane>
   );
 };

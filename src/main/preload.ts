@@ -1,21 +1,34 @@
-import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
+import { contextBridge } from 'electron';
+import { typedIpcRenderer } from '../utils/ipc';
+import { YoutubeDlAudioOptions } from './youtube/types';
 
-export type Channels = 'ipc-example';
+export type ElectronYtdl = typeof exposedYtdl;
 
-contextBridge.exposeInMainWorld('electron', {
-  ipcRenderer: {
-    sendMessage(channel: Channels, args: unknown[]) {
-      ipcRenderer.send(channel, args);
-    },
-    on(channel: Channels, func: (...args: unknown[]) => void) {
-      const subscription = (event: IpcRendererEvent, ...args: unknown[]) =>
-        func(...args);
-      ipcRenderer.on(channel, subscription);
+const exposedYtdl = {
+  downloadAudio: (url: string, options: YoutubeDlAudioOptions = {}) => {
+    const msg = typedIpcRenderer.createMessage('ytdl', 'downloadAudio', {
+      url,
+      format: options.format || 'mp3',
+    });
 
-      return () => ipcRenderer.removeListener(channel, subscription);
-    },
-    once(channel: Channels, func: (...args: unknown[]) => void) {
-      ipcRenderer.once(channel, (event, ...args) => func(...args));
-    },
+    msg.onReply((response) => {
+      if (typedIpcRenderer.is(response, 'downloadAudioProgress')) {
+        options.onProgress?.({
+          percentage: response.data.percentage,
+          speed: response.data.speed,
+          eta: response.data.eta,
+          size: response.data.size,
+        });
+        return;
+      }
+
+      if (typedIpcRenderer.is(response, 'downloadAudioError')) {
+        options.onError?.(response.data);
+      }
+    });
+
+    msg.send();
   },
-});
+};
+
+contextBridge.exposeInMainWorld('ytdl', exposedYtdl);

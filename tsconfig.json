@@ -27,10 +27,14 @@
     "paths": {
       "@assets": ["assets"],
       "@assets/*": ["assets/*"],
+      "@interfaces": ["src/interfaces"],
+      "@interfaces/*": ["src/interfaces/*"],
       "@main": ["src/main"],
       "@main/*": ["src/main/*"],
       "@renderer": ["src/renderer"],
-      "@renderer/*": ["src/renderer/*"]
+      "@renderer/*": ["src/renderer/*"],
+      "@utils": ["src/utils"],
+      "@utils/*": ["src/utils/*"]
     }
   },
   "exclude": ["test", "release/build", "release/app/dist", ".erb/dll"]

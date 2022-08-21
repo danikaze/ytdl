@@ -1,14 +1,23 @@
+import { Table } from 'evergreen-ui';
+import { TABLE_COLS } from '../download-list/constants';
+import { ProgressBar } from '../progress-bar';
+
 export interface Props {
-  id: string;
+  index: number;
   url: string;
   progress: number;
 }
 
-export function DownloadItem({ id, url, progress }: Props): JSX.Element {
+export function DownloadItem({ index, url, progress }: Props): JSX.Element {
   return (
-    <div key={id}>
-      <div>Url: {url}</div>
-      <div>Progress: {progress}</div>
-    </div>
+    <Table.Row height={32}>
+      <Table.TextCell {...TABLE_COLS.index}>{index}</Table.TextCell>
+      <Table.TextCell {...TABLE_COLS.url}>
+        <a href={url}>{url}</a>
+      </Table.TextCell>
+      <Table.Cell {...TABLE_COLS.progress}>
+        <ProgressBar progress={progress} />
+      </Table.Cell>
+    </Table.Row>
   );
 }

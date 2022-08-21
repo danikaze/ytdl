@@ -46,6 +46,9 @@ module.exports = {
       },
     ],
 
+    // https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/jsx-props-no-spreading.md
+    'react/jsx-props-no-spreading': 'off',
+
     // https://eslint.org/docs/latest/rules/no-plusplus
     'no-plusplus': 'off',
 

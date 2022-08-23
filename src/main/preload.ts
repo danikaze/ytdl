@@ -1,3 +1,4 @@
+import { setupRendererIpc } from '@renderer/ipc';
 import { contextBridge } from 'electron';
 import { typedIpcRenderer } from '../utils/ipc';
 import { YoutubeDlAudioOptions } from './youtube/types';
@@ -5,6 +6,7 @@ import { YoutubeDlAudioOptions } from './youtube/types';
 export type ElectronYtdl = typeof exposedYtdl;
 
 const exposedYtdl = {
+  setupIpc: setupRendererIpc,
   downloadAudio: (url: string, options: YoutubeDlAudioOptions = {}) => {
     const msg = typedIpcRenderer.createMessage('ytdl', 'downloadAudio', {
       url,

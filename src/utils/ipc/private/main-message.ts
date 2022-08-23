@@ -8,7 +8,7 @@ export type IpcMainMessage<
   C extends string, // Channels
   TDM extends TypeDataMapping, // Type-Data Mapping
   T extends keyof TDM // Message Type
-> = Omit<IpcMainMessageClass<W, C, TDM, T>, 'end' | 'reply'>;
+> = Omit<IpcMainMessageClass<W, C, TDM, T>, 'reply'>;
 
 export type IpcMainIncomingMessage<
   W extends string | number | Symbol, // Target ids

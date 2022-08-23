@@ -10,6 +10,11 @@ import './app.module.scss';
 
 export default function App() {
   const theme = lightTheme;
+
+  useEffect(() => {
+    window.ytdl.setupIpc();
+  }, []);
+
   useEffect(() => {
     setThemeGlobals(theme);
   }, [theme]);

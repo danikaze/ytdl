@@ -14,7 +14,7 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
-import { setupIpc } from './ipc';
+import { setupMainIpc } from './ipc';
 
 class AppUpdater {
   constructor() {
@@ -25,8 +25,6 @@ class AppUpdater {
 }
 
 let mainWindow: BrowserWindow | null = null;
-
-setupIpc();
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
@@ -77,6 +75,7 @@ const createWindow = async () => {
         : path.join(__dirname, '../../.erb/dll/preload.js'),
     },
   });
+  setupMainIpc(mainWindow);
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 

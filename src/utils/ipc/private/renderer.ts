@@ -181,12 +181,6 @@ export class TypedIpcRenderer<
         data.data as TDM[keyof TDM]
       );
 
-      // call all attached handlers with the incoming message
-      const handlers = this.getChannelHandlers(channel);
-      for (let i = 0; i < handlers.length; i++) {
-        handlers[i](msg);
-      }
-
       // if the message was sent with `.end()`, then remove all handlers
       // attached to that message `id`
       if (data.type === END_MSG_TYPE) {
@@ -195,6 +189,13 @@ export class TypedIpcRenderer<
           this.off(channel, idHandlers[i]);
         }
         this.idHandlers.delete(data.id);
+        return;
+      }
+
+      // call all attached handlers with the incoming message
+      const handlers = this.getChannelHandlers(channel);
+      for (let i = 0; i < handlers.length; i++) {
+        handlers[i](msg);
       }
     };
   }

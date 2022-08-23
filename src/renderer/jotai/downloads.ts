@@ -24,7 +24,10 @@ export function useDownloads() {
     return id;
   }
 
-  function updateDownload(id: string, value: Partial<Omit<Download, 'id'>>) {
+  function updateDownload(
+    id: string,
+    value: Partial<Nullable<Omit<Download, 'id'>>>
+  ) {
     const item = downloads.find((dl) => dl.id === id);
     if (!item) return;
     Object.assign(item, value);

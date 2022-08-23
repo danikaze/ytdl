@@ -6,6 +6,7 @@ import {
   mergeTheme,
   useTheme,
 } from 'evergreen-ui';
+import { DownloadState } from '@interfaces/download';
 
 export interface YtdlTheme extends DefaultTheme {
   roles: {
@@ -13,6 +14,7 @@ export interface YtdlTheme extends DefaultTheme {
     linkColorHover: Color;
   };
   components: DefaultTheme['components'] & {
+    DownloadState: Record<DownloadState, Color>;
     ProgressBar: {
       borderRadius: string;
       barPending: Color;

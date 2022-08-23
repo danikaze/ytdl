@@ -13,7 +13,10 @@ export interface Download {
   id: string;
   state: DownloadState;
   url: string;
-  dowloadPctg: number;
+  downloadPctg: number;
   temporalFile: string;
+  size?: string;
+  speed?: number;
+  eta?: number;
   error?: string;
 }

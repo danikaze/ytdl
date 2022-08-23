@@ -10,4 +10,5 @@ export interface IpcMessagesData {
   };
   downloadAudioProgress: YoutubeDlProgress;
   downloadAudioError: string;
+  downloadAudioComplete: number | null;
 }

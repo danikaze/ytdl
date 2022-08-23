@@ -25,6 +25,10 @@ const exposedYtdl = {
       if (typedIpcRenderer.is(response, 'downloadAudioError')) {
         options.onError?.(response.data);
       }
+
+      if (typedIpcRenderer.is(response, 'downloadAudioComplete')) {
+        options.onComplete?.(response.data);
+      }
     });
 
     msg.send();

@@ -8,8 +8,8 @@ export interface Props {
 }
 
 export function DownloadList({ downloads }: Props): JSX.Element {
-  const list = downloads.map(({ id, url, dowloadPctg }, index) => (
-    <DownloadItem key={id} index={index + 1} url={url} progress={dowloadPctg} />
+  const list = downloads.map((download, index) => (
+    <DownloadItem key={download.id} {...download} index={index} />
   ));
 
   return (
@@ -25,9 +25,12 @@ function renderHeader(): JSX.Element {
     <Table.Head height={32}>
       <Table.TextHeaderCell {...TABLE_COLS.index}>#</Table.TextHeaderCell>
       <Table.TextHeaderCell {...TABLE_COLS.url}>URL</Table.TextHeaderCell>
+      <Table.TextHeaderCell {...TABLE_COLS.size}>Size</Table.TextHeaderCell>
       <Table.TextHeaderCell {...TABLE_COLS.progress}>
         Progress
       </Table.TextHeaderCell>
+      <Table.TextHeaderCell {...TABLE_COLS.speed}>DL</Table.TextHeaderCell>
+      <Table.TextHeaderCell {...TABLE_COLS.eta}>ETA</Table.TextHeaderCell>
     </Table.Head>
   );
 }

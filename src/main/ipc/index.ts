@@ -14,7 +14,10 @@ export function setupIpc() {
     if (typedIpcMain.is(msg, 'downloadAudio')) {
       const options: YoutubeDlAudioOptions = {
         format: msg.data.format,
-        onComplete: () => msg.end(),
+        onComplete: (exitCode) => {
+          msg.reply('downloadAudioComplete', exitCode);
+          msg.end();
+        },
         onProgress: (progress) => msg.reply('downloadAudioProgress', progress),
         onError: (error) => msg.reply('downloadAudioError', error),
       };

@@ -1,4 +1,5 @@
 import { YoutubeDlAudioOptions } from '@main/youtube/types';
+import { BrowserWindow } from 'electron';
 import { typedIpcMain } from '../../utils/ipc';
 import { downloadAudio } from '../youtube';
 
@@ -9,7 +10,9 @@ export type IpcMsg<T extends string, D extends {} = {}> = {
   type: T;
 } & D;
 
-export function setupIpc() {
+export function setupMainIpc(mainWindow: BrowserWindow) {
+  typedIpcMain.registerTarget('main', mainWindow);
+
   typedIpcMain.on({ channel: IPC_CHANNEL }, async (msg) => {
     if (typedIpcMain.is(msg, 'downloadAudio')) {
       const options: YoutubeDlAudioOptions = {

@@ -7,7 +7,7 @@ export type IpcRendererMessage<
   C extends string, // Channels
   TDM extends TypeDataMapping, // Type-Data Mapping
   T extends keyof TDM // Message Type
-> = Omit<IpcRendererMessageClass<C, TDM, T>, 'end' | 'reply'>;
+> = Omit<IpcRendererMessageClass<C, TDM, T>, 'reply'>;
 
 export type IpcRendererIncomingMessage<
   C extends string, // Channels

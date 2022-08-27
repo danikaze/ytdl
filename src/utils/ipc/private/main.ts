@@ -39,11 +39,11 @@ export class TypedIpcMain<
   TDM extends TypeDataMapping // Type-Data Mapping
 > {
   /**
-   * Mapping between TargetIds => WebContents to be able to send messages
+   * Mapping between TargetIds => BrowserWindows to be able to send messages
    * directly from the main process to different windows
    * (need to be registered first via `registerTarget()`)
    */
-  private targets: Map<W, WebContents> = new Map();
+  private windows: Map<W, BrowserWindow> = new Map();
 
   /**
    * List of private handlers attached to the `ipcMain` object,
@@ -75,14 +75,21 @@ export class TypedIpcMain<
     IpcMessageHandlerWrapper<W, C, TDM>
   > = new Map();
 
-  public registerTarget(
-    targetId: W,
-    target: BrowserWindow | WebContents
-  ): void {
-    this.targets.set(
-      targetId,
-      target instanceof BrowserWindow ? target.webContents : target
-    );
+  public registerTarget(targetId: W, window: BrowserWindow): void {
+    this.windows.set(targetId, window);
+  }
+
+  public getWindow(
+    msgOrTarget: IpcMainMessage<W, C, TDM, keyof TDM> | WebContents
+  ): BrowserWindow {
+    const windows = this.windows.values();
+    const target = this.isMsg(msgOrTarget) ? msgOrTarget.target : msgOrTarget;
+
+    for (const window of windows) {
+      if (window.id === target.id) return window;
+    }
+
+    throw new Error(`Target for the message has not been set`);
   }
 
   public is<T extends keyof TDM>(
@@ -107,11 +114,11 @@ export class TypedIpcMain<
     type: T,
     data: TDM[T]
   ): IpcMainMessage<W, C, TDM, keyof TDM> {
-    const target = this.targets.get(targetId);
-    if (!target) {
+    const window = this.windows.get(targetId);
+    if (!window) {
       throw new Error(`Target ${targetId} has not been set`);
     }
-    return createIpcMainMessage(this, target, channel, type, data);
+    return createIpcMainMessage(this, window.webContents, channel, type, data);
   }
 
   public on<T extends keyof TDM = keyof TDM>(
@@ -223,5 +230,12 @@ export class TypedIpcMain<
         handlers[i](msg);
       }
     };
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  private isMsg(
+    obj: IpcMainMessage<W, C, TDM, keyof TDM> | WebContents
+  ): obj is IpcMainMessage<W, C, TDM, keyof TDM> {
+    return (obj as IpcMainMessage<W, C, TDM, keyof TDM>).target !== undefined;
   }
 }

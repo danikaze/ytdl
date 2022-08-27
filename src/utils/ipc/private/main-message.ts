@@ -75,6 +75,8 @@ class IpcMainMessageClass<
 
   public readonly data: Readonly<TDM[T]>;
 
+  public readonly target: WebContents;
+
   public channel: C;
 
   public id: string;
@@ -82,8 +84,6 @@ class IpcMainMessageClass<
   public type: T;
 
   private ipc: TypedIpcMain<W, C, TDM>;
-
-  private target: WebContents;
 
   constructor(
     ipc: TypedIpcMain<W, C, TDM>,

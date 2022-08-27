@@ -5,6 +5,7 @@ import {
   BrowserWindow,
   MenuItemConstructorOptions,
 } from 'electron';
+import { typedIpcMain } from '../utils/ipc';
 
 interface DarwinMenuItemConstructorOptions extends MenuItemConstructorOptions {
   selector?: string;
@@ -198,8 +199,20 @@ export default class MenuBuilder {
         label: '&File',
         submenu: [
           {
-            label: '&Open',
+            label: '&Settings',
             accelerator: 'Ctrl+O',
+            click: () => {
+              const msg = typedIpcMain.createMessage(
+                'main',
+                'ytdl',
+                'changeScreen',
+                {
+                  screen: 'settings',
+                }
+              );
+              msg.send();
+              msg.end();
+            },
           },
           {
             label: '&Close',

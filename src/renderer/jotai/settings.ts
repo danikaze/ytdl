@@ -1,5 +1,5 @@
 import { atom, useAtom } from 'jotai';
-import { Settings } from 'src/interfaces/settings';
+import { Settings } from '@interfaces/settings';
 
 const rawSettings = atom<Settings>({
   youtubeDlVersion: '2021.12.17',

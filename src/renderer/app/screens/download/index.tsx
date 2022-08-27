@@ -1,4 +1,3 @@
-import { Provider } from 'jotai';
 import { DownloadList } from '@renderer/components/download-list';
 import { YoutubeInput } from '@renderer/components/yt-input';
 import { useDownloads } from '@renderer/jotai/downloads';
@@ -8,7 +7,6 @@ export function DownloadScreen() {
   const downloads = useDownloads();
 
   const urlInputHandler = (url: string) => {
-    // console.log('URL', url);
     const id = downloads.add({
       url,
       downloadPctg: 0,
@@ -45,11 +43,9 @@ export function DownloadScreen() {
   };
 
   return (
-    <Provider>
-      <div>
-        <YoutubeInput onInput={urlInputHandler} />
-        <DownloadList downloads={downloads.list} />
-      </div>
-    </Provider>
+    <div>
+      <YoutubeInput onInput={urlInputHandler} />
+      <DownloadList downloads={downloads.list} />
+    </div>
   );
 }

@@ -1,0 +1,37 @@
+$sectionPadding: 16px;
+
+.root {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: grid;
+  grid-template-columns: 200px auto;
+  grid-template-rows: 60px auto;
+}
+
+.top {
+  display: flex;
+  grid-column: 1 / 3;
+  grid-row: 1 / 1;
+  padding: 16px;
+}
+
+.left {
+  grid-column: 1 / 2;
+  grid-row: 2 / 3;
+  display: flex;
+  flex-direction: column;
+  padding: $sectionPadding;
+}
+
+.main {
+  grid-column: 2 / 3;
+  grid-row: 2 / 3;
+  padding: $sectionPadding;
+}
+
+.hidden {
+  display: none;
+}

@@ -1,5 +1,5 @@
+import { contextBridge, OpenDialogOptions } from 'electron';
 import { setupRendererIpc } from '@renderer/ipc';
-import { contextBridge } from 'electron';
 import { typedIpcRenderer } from '../utils/ipc';
 import { YoutubeDlAudioOptions } from './youtube/types';
 
@@ -34,6 +34,21 @@ const exposedYtdl = {
     });
 
     msg.send();
+  },
+  pickFile: (dialogOptions: OpenDialogOptions) => {
+    return new Promise<readonly string[] | undefined>((resolve) => {
+      const msg = typedIpcRenderer.createMessage(
+        'ytdl',
+        'pickPath',
+        dialogOptions
+      );
+      msg.onReply((reply) => {
+        if (typedIpcRenderer.is(reply, 'pickPathResult')) {
+          resolve(reply.data);
+        }
+      });
+      msg.send();
+    });
   },
 };
 

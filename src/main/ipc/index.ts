@@ -1,5 +1,5 @@
+import { BrowserWindow, dialog } from 'electron';
 import { YoutubeDlAudioOptions } from '@main/youtube/types';
-import { BrowserWindow } from 'electron';
 import { typedIpcMain } from '../../utils/ipc';
 import { downloadAudio } from '../youtube';
 
@@ -25,6 +25,12 @@ export function setupMainIpc(mainWindow: BrowserWindow) {
         onError: (error) => msg.reply('downloadAudioError', error),
       };
       downloadAudio(msg.data.url, options);
+    }
+
+    if (typedIpcMain.is(msg, 'pickPath')) {
+      const window = typedIpcMain.getWindow(msg.target);
+      const pickResult = await dialog.showOpenDialog(window, msg.data);
+      msg.reply('pickPathResult', pickResult.filePaths);
     }
   });
 }

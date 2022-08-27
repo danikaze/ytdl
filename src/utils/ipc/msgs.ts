@@ -1,3 +1,4 @@
+import type { OpenDialogOptions } from 'electron';
 import type { AppScreen } from '@interfaces/app';
 import type {
   YoutubeDlAudioFormat,
@@ -15,4 +16,6 @@ export interface IpcMessagesData {
   downloadAudioProgress: YoutubeDlProgress;
   downloadAudioError: string;
   downloadAudioComplete: number | null;
+  pickPath: OpenDialogOptions;
+  pickPathResult: string[] | undefined;
 }

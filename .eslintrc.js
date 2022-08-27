@@ -36,6 +36,33 @@ module.exports = {
     // allows placing the hooks logic in a different file for better code management
     'react-hooks/rules-of-hooks': 'off',
 
+    // https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/require-default-props.md
+    'react/require-default-props': 'off',
+
+    // https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/no-unused-prop-types.md
+    'react/no-unused-prop-types': 'off',
+
+    // https://eslint.org/docs/latest/rules/no-restricted-syntax
+    // remove the for-of usage restriction from airbnb-base rules
+    'no-restricted-syntax': [
+      'error',
+      {
+        selector: 'ForInStatement',
+        message:
+          'for..in loops iterate over the entire prototype chain, which is virtually never what you want. Use Object.{keys,values,entries}, and iterate over the resulting array.',
+      },
+      {
+        selector: 'LabeledStatement',
+        message:
+          'Labels are a form of GOTO; using them makes code confusing and hard to maintain and understand.',
+      },
+      {
+        selector: 'WithStatement',
+        message:
+          '`with` is disallowed in strict mode because it makes code impossible to predict and optimize.',
+      },
+    ],
+
     // https://typescript-eslint.io/rules/no-use-before-define/
     'no-use-before-define': 'off',
     '@typescript-eslint/no-use-before-define': [

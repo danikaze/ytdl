@@ -7,6 +7,9 @@ export const lightTheme = createTheme({
   roles: {
     linkColor: defaultTheme.colors.blue400,
     linkColorHover: defaultTheme.colors.blue600,
+    header: {
+      background: defaultTheme.colors.blue50,
+    },
   },
   components: {
     DownloadState: {

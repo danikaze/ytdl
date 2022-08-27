@@ -12,6 +12,9 @@ export interface YtdlTheme extends DefaultTheme {
   roles: {
     linkColor: Color;
     linkColorHover: Color;
+    header: {
+      background: Color;
+    };
   };
   components: DefaultTheme['components'] & {
     DownloadState: Record<DownloadState, Color>;

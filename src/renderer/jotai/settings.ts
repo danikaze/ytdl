@@ -11,15 +11,18 @@ const rawSettings = atom<Settings>({
 export function useSettings() {
   const [settings, setSettings] = useAtom(rawSettings);
 
-  function updateSettings(newSettings: Partial<Settings>): void {
+  function setSetting<T extends keyof Settings>(
+    key: T,
+    value: Settings[T]
+  ): void {
     setSettings({
       ...settings,
-      ...newSettings,
+      [key]: value,
     });
   }
 
   return {
     settings: settings as Readonly<Settings>,
-    updateSettings,
+    setSetting,
   };
 }

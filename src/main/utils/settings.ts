@@ -1,5 +1,8 @@
-export interface MainSettingsOptions<S extends {}> {
-  defaultValues?: S;
+import type { Settings } from '@interfaces/settings';
+import { store } from '../storage';
+
+export interface MainSettingsOptions {
+  defaultValues: Readonly<Settings>;
 }
 
 /**
@@ -9,32 +12,35 @@ export interface MainSettingsOptions<S extends {}> {
  * - Get updates from the renderer
  * - Settings upgrades between versions
  */
-export class MainSettings<S extends {}> {
-  private readonly values: Map<keyof S, S[keyof S]> = new Map();
+export class MainSettings {
+  private readonly defaultValues: Readonly<Settings>;
 
-  public constructor({ defaultValues }: MainSettingsOptions<S>) {
-    this.values = defaultValues
-      ? new Map(Object.entries(defaultValues))
-      : new Map();
+  private values: Settings;
+
+  public constructor({ defaultValues }: MainSettingsOptions) {
+    this.defaultValues = defaultValues;
+    this.values = { ...defaultValues };
   }
 
-  public async load(): Promise<Readonly<S>> {
-    return Object.fromEntries(this.values) as S;
+  public async load(): Promise<Readonly<Settings>> {
+    const loadedSettings = store.get('settings', this.defaultValues);
+    this.values = loadedSettings;
+    return loadedSettings;
   }
 
-  // public async save(): Promise<void> {}
-
-  public set<K extends keyof S>(key: K, value: S[K]): void {
-    this.values.set(key, value);
+  public async save(): Promise<void> {
+    store.set('settings', this.values);
   }
 
-  public get<K extends keyof S>(key: K): S[K] | undefined {
-    return this.values.get(key) as S[K];
+  public set<K extends keyof Settings>(key: K, value: Settings[K]): void {
+    this.values[key] = value;
   }
 
-  public delete<K extends keyof S>(key: K): void {
-    this.values.delete(key);
+  public get<K extends keyof Settings>(key: K): Settings[K] | undefined {
+    return this.values[key];
   }
 
-  // protected async upgrade(): Promise<void> {}
+  public delete<K extends keyof Settings>(key: K): void {
+    delete this.values[key];
+  }
 }

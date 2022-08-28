@@ -41,6 +41,7 @@ export function setupMainIpc(mainWindow: BrowserWindow) {
       Object.entries(msg.data).forEach(([key, value]) => {
         mainSettings.set(key as keyof Settings, value);
       });
+      mainSettings.save();
     }
   });
 }

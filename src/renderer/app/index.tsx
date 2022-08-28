@@ -3,19 +3,22 @@ import { useEffect } from 'react';
 import { lightTheme } from '@renderer/themes/light';
 import { setThemeGlobals } from '@renderer/themes';
 import { useAppScreen } from '@renderer/jotai/app-screen';
+import { useSettings } from '@renderer/jotai/settings';
 
 import { DownloadScreen } from './screens/download';
 import { SettingsScreen } from './screens/settings';
+import { LoadingScreen } from './screens/loading';
 
 import './app.module.scss';
 
 export function App(): JSX.Element {
   const { screen, setScreen } = useAppScreen();
+  const { setSettings } = useSettings();
   const theme = lightTheme;
 
   useEffect(() => {
-    window.ytdl.setupIpc({ setScreen });
-  }, [setScreen]);
+    window.ytdl.setupIpc({ setScreen, setSettings });
+  }, [setScreen, setSettings]);
 
   useEffect(() => {
     setThemeGlobals(theme);
@@ -23,7 +26,9 @@ export function App(): JSX.Element {
 
   let page;
 
-  if (screen === 'downloads') {
+  if (screen === 'loading') {
+    page = <LoadingScreen />;
+  } else if (screen === 'downloads') {
     page = <DownloadScreen />;
   } else if (screen === 'settings') {
     page = <SettingsScreen />;

@@ -1,15 +1,14 @@
 import { spawn } from 'child_process';
-import { join } from 'path';
-import { processDownloadData } from './process-download-data';
+import { rename } from 'fs';
+import { basename, dirname, join } from 'path';
+import { sync as mkdirpSync } from 'mkdirp';
+import { parseDownload } from './parser/download';
 import { YoutubeDlAudioOptions, YoutubeDlOptions } from './types';
+import { mainSettings } from '../settings';
+import { parseDestination } from './parser/destination';
 
-export function downloadAudio(
-  url: string,
-  options: YoutubeDlAudioOptions = {}
-) {
+export function downloadAudio(url: string, options: YoutubeDlAudioOptions) {
   const args = [
-    '-o',
-    '%(title)s.%(ext)s',
     '--extract-audio',
     '--audio-quality',
     '0',
@@ -20,6 +19,8 @@ export function downloadAudio(
 
   youtubeDownload({
     args,
+    outputFolder: options.outputFolder,
+    outputFile: options.outputFile,
     onComplete: options.onComplete,
     onError: options.onError,
     onProgress: options.onProgress,
@@ -28,6 +29,8 @@ export function downloadAudio(
 
 function youtubeDownload({
   args,
+  outputFolder,
+  outputFile,
   onProgress,
   onError,
   onComplete,
@@ -35,25 +38,76 @@ function youtubeDownload({
   const exePath = getExePath('2021.12.17');
   // console.log(`${basename(exePath)} ${args.join(' ')}`);
   try {
-    const child = spawn(exePath, args);
+    if (args.includes('-o')) {
+      throw new Error(
+        'Do not use -o args, but use outputFolder and outputFile instead'
+      );
+    }
+
+    const temporalFolder =
+      mainSettings.get('useTemporalFolder') &&
+      mainSettings.get('temporalFolder');
+    const outputArg = join(
+      temporalFolder || outputFolder,
+      `${outputFile}.%(ext)s`
+    );
+    let downloadDestination: string;
+
+    const exeArgs = ['-o', outputArg, ...args];
+    console.log('ytdl:', {
+      useTemporalFolder: mainSettings.get('useTemporalFolder'),
+      temporalFolder: mainSettings.get('temporalFolder'),
+      downloadOutputPath: outputArg,
+      exeArgs,
+    });
+    const child = spawn(exePath, exeArgs);
+
     child.stdout.on('data', (data) => {
-      // console.log(String(data));
+      console.log(String(data));
+      const destination = parseDestination(data);
+      if (destination) {
+        downloadDestination = destination;
+      }
       if (onProgress) {
-        const progress = processDownloadData(data);
+        const progress = parseDownload(data);
         if (progress) onProgress(progress);
       }
     });
+
     child.stderr.on('data', (data) => {
-      // console.log(`yt [error]: ${data}`);
+      console.log(`yt [error]: ${data}`);
       onError?.(data);
     });
+
     child.on('close', (code) => {
-      // console.log('complete', code);
+      if (temporalFolder) {
+        const finalOutputPath = join(
+          outputFolder,
+          basename(downloadDestination)
+        );
+        console.log(
+          `Moving file from "${downloadDestination}" to ${finalOutputPath}`
+        );
+        try {
+          mkdirpSync(dirname(finalOutputPath));
+          rename(downloadDestination, finalOutputPath, (err) => {
+            if (err) {
+              onError?.(err.message);
+            }
+            onComplete?.(code);
+          });
+        } catch (e) {
+          onError?.(String(e));
+        }
+        return;
+      }
+
+      console.log('complete', code);
       onComplete?.(code);
     });
   } catch (e) {
     onError?.(String(e));
-    // console.error(e);
+    console.error(e);
   }
 }
 

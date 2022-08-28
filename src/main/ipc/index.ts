@@ -1,5 +1,7 @@
 import { BrowserWindow, dialog } from 'electron';
-import { YoutubeDlAudioOptions } from '@main/youtube/types';
+import type { YoutubeDlAudioOptions } from '@main/youtube/types';
+import type { Settings } from '@interfaces/settings';
+import { mainSettings } from '../settings';
 import { typedIpcMain } from '../../utils/ipc';
 import { downloadAudio } from '../youtube';
 
@@ -16,6 +18,8 @@ export function setupMainIpc(mainWindow: BrowserWindow) {
   typedIpcMain.on({ channel: IPC_CHANNEL }, async (msg) => {
     if (typedIpcMain.is(msg, 'downloadAudio')) {
       const options: YoutubeDlAudioOptions = {
+        outputFolder: msg.data.outputFolder,
+        outputFile: msg.data.outputFile,
         format: msg.data.format,
         onComplete: (exitCode) => {
           msg.reply('downloadAudioComplete', exitCode);
@@ -31,6 +35,12 @@ export function setupMainIpc(mainWindow: BrowserWindow) {
       const window = typedIpcMain.getWindow(msg.target);
       const pickResult = await dialog.showOpenDialog(window, msg.data);
       msg.reply('pickPathResult', pickResult.filePaths);
+    }
+
+    if (typedIpcMain.is(msg, 'updateSettings')) {
+      Object.entries(msg.data).forEach(([key, value]) => {
+        mainSettings.set(key as keyof Settings, value);
+      });
     }
   });
 }

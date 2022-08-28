@@ -1,1 +1,1 @@
-export type AppScreen = 'downloads' | 'settings';
+export type AppScreen = 'loading' | 'downloads' | 'settings';

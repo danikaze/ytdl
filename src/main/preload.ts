@@ -1,4 +1,5 @@
 import { contextBridge, OpenDialogOptions } from 'electron';
+import type { Settings } from '@interfaces/settings';
 import { setupRendererIpc } from '@renderer/ipc';
 import { typedIpcRenderer } from '../utils/ipc';
 import { YoutubeDlAudioOptions } from './youtube/types';
@@ -7,9 +8,11 @@ export type ElectronYtdl = typeof exposedYtdl;
 
 const exposedYtdl = {
   setupIpc: setupRendererIpc,
-  downloadAudio: (url: string, options: YoutubeDlAudioOptions = {}) => {
+  downloadAudio: (url: string, options: YoutubeDlAudioOptions) => {
     const msg = typedIpcRenderer.createMessage('ytdl', 'downloadAudio', {
       url,
+      outputFolder: options.outputFolder,
+      outputFile: options.outputFile,
       format: options.format || 'mp3',
     });
 
@@ -49,6 +52,12 @@ const exposedYtdl = {
       });
       msg.send();
     });
+  },
+  updateSetting: <K extends keyof Settings>(key: K, value: Settings[K]) => {
+    const msg = typedIpcRenderer.createMessage('ytdl', 'updateSettings', {
+      [key]: value,
+    });
+    msg.send();
   },
 };
 

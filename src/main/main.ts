@@ -13,8 +13,10 @@ import { app, BrowserWindow, shell } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
-import { resolveHtmlPath } from './util';
+import { typedIpcMain } from '../utils/ipc';
+import { resolveHtmlPath } from './utils/resolve-html-path';
 import { setupMainIpc } from './ipc';
+import { mainSettings } from './settings';
 
 class AppUpdater {
   constructor() {
@@ -76,10 +78,9 @@ const createWindow = async () => {
     },
   });
   setupMainIpc(mainWindow);
-
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
-  mainWindow.on('ready-to-show', () => {
+  mainWindow.on('ready-to-show', async () => {
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');
     }
@@ -88,6 +89,18 @@ const createWindow = async () => {
     } else {
       mainWindow.show();
     }
+  });
+
+  mainWindow.webContents.on('did-finish-load', async () => {
+    const settings = await mainSettings.load();
+    const initSettings = typedIpcMain.createMessage(
+      'main',
+      'ytdl',
+      'initSettings',
+      settings
+    );
+    initSettings.send();
+    initSettings.end();
   });
 
   mainWindow.on('closed', () => {

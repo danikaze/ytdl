@@ -1,4 +1,4 @@
-import { YoutubeDlProgress } from './types';
+import { YoutubeDlProgress } from '../types';
 
 // [download]  35.9% of 31.25MiB at 58.80KiB/s ETA 05:48
 const DL_PROGRESS_RE =
@@ -14,9 +14,7 @@ const BYTE_MAP = {
   gib: 1e12,
 };
 
-export function processDownloadData(
-  data: string
-): YoutubeDlProgress | undefined {
+export function parseDownload(data: string): YoutubeDlProgress | undefined {
   const finished = DL_COMPLETE_RE.exec(data);
   if (finished) {
     return {

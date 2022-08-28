@@ -14,6 +14,8 @@ export interface YoutubeDlAudioOptions extends Omit<YoutubeDlOptions, 'args'> {
 
 export interface YoutubeDlOptions {
   args: string[];
+  outputFolder: string;
+  outputFile: string;
   onProgress?: (progress: YoutubeDlProgress) => void;
   onError?: (data: string) => void;
   onComplete?: (code: number | null) => void;

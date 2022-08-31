@@ -3,6 +3,7 @@ import { YoutubeInput } from '@renderer/components/yt-input';
 import { useDownloads } from '@renderer/jotai/downloads';
 import { DownloadState } from '@interfaces/download';
 import { useSettings } from '@renderer/jotai/settings';
+import { isProgressUpdate, isStateUpdate } from '@utils/youtube/types';
 
 export function DownloadScreen() {
   const { settings } = useSettings();
@@ -16,19 +17,26 @@ export function DownloadScreen() {
     window.ytdl.downloadAudio(url, {
       outputFolder: settings.downloadFolder,
       outputFile: '%(title)s',
-      onProgress: (progress) => {
+      onUpdate: (update) => {
         // console.log('progress', progress);
-        downloads.update(id, {
-          state: DownloadState.DOWNLOADING,
-          downloadPctg: progress.percentage,
-          size: progress.size,
-          speed: progress.speed,
-          eta: progress.eta,
-        });
+        if (isStateUpdate(update)) {
+          downloads.update(id, {
+            state: update.state,
+          });
+        } else if (isProgressUpdate(update)) {
+          downloads.update(id, {
+            state: DownloadState.DOWNLOADING,
+            downloadPctg: update.percentage,
+            size: update.size,
+            speed: update.speed,
+            eta: update.eta,
+          });
+        }
       },
       onError: (error) => {
         // console.log('error', error);
         downloads.update(id, {
+          error,
           state: DownloadState.ERRORED,
           speed: undefined,
           eta: undefined,

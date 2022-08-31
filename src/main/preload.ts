@@ -2,12 +2,16 @@ import { contextBridge, OpenDialogOptions } from 'electron';
 import type { Settings } from '@interfaces/settings';
 import { setupRendererIpc } from '@renderer/ipc';
 import { typedIpcRenderer } from '../utils/ipc';
-import { YoutubeDlAudioOptions } from './youtube/types';
+import {
+  YoutubeDlAudioOptions,
+  YoutubeDlVideoOptions,
+} from '../utils/youtube/types';
 
 export type ElectronYtdl = typeof exposedYtdl;
 
 const exposedYtdl = {
   setupIpc: setupRendererIpc,
+
   downloadAudio: (url: string, options: YoutubeDlAudioOptions) => {
     const msg = typedIpcRenderer.createMessage('ytdl', 'downloadAudio', {
       url,
@@ -17,27 +21,51 @@ const exposedYtdl = {
     });
 
     msg.onReply((response) => {
-      if (typedIpcRenderer.is(response, 'downloadAudioProgress')) {
-        options.onProgress?.({
-          percentage: response.data.percentage,
-          speed: response.data.speed,
-          eta: response.data.eta,
-          size: response.data.size,
-        });
+      if (typedIpcRenderer.is(response, 'ytdlUpdate')) {
+        options.onUpdate?.(response.data);
         return;
       }
 
-      if (typedIpcRenderer.is(response, 'downloadAudioError')) {
+      if (typedIpcRenderer.is(response, 'ytdlError')) {
         options.onError?.(response.data);
+        return;
       }
 
-      if (typedIpcRenderer.is(response, 'downloadAudioComplete')) {
+      if (typedIpcRenderer.is(response, 'ytdlComplete')) {
         options.onComplete?.(response.data);
       }
     });
 
     msg.send();
   },
+
+  downloadVideo: (url: string, options: YoutubeDlVideoOptions) => {
+    const msg = typedIpcRenderer.createMessage('ytdl', 'downloadVideo', {
+      url,
+      outputFolder: options.outputFolder,
+      outputFile: options.outputFile,
+      format: options.format || 'best',
+    });
+
+    msg.onReply((response) => {
+      if (typedIpcRenderer.is(response, 'ytdlUpdate')) {
+        options.onUpdate?.(response.data);
+        return;
+      }
+
+      if (typedIpcRenderer.is(response, 'ytdlError')) {
+        options.onError?.(response.data);
+        return;
+      }
+
+      if (typedIpcRenderer.is(response, 'ytdlComplete')) {
+        options.onComplete?.(response.data);
+      }
+    });
+
+    msg.send();
+  },
+
   pickFile: (dialogOptions: OpenDialogOptions) => {
     return new Promise<readonly string[] | undefined>((resolve) => {
       const msg = typedIpcRenderer.createMessage(
@@ -53,6 +81,7 @@ const exposedYtdl = {
       msg.send();
     });
   },
+
   updateSetting: <K extends keyof Settings>(key: K, value: Settings[K]) => {
     const msg = typedIpcRenderer.createMessage('ytdl', 'updateSettings', {
       [key]: value,

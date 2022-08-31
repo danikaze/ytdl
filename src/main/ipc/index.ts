@@ -1,9 +1,12 @@
 import { BrowserWindow, dialog } from 'electron';
-import type { YoutubeDlAudioOptions } from '@main/youtube/types';
-import type { Settings } from '@interfaces/settings';
-import { mainSettings } from '../settings';
+import type { Settings } from '../../interfaces/settings';
+import type {
+  YoutubeDlAudioOptions,
+  YoutubeDlVideoOptions,
+} from '../../utils/youtube/types';
+import { downloadAudio, downloadVideo } from '../../utils/youtube';
 import { typedIpcMain } from '../../utils/ipc';
-import { downloadAudio } from '../youtube';
+import { mainSettings } from '../settings';
 
 export const IPC_CHANNEL = 'ytdl';
 
@@ -22,13 +25,28 @@ export function setupMainIpc(mainWindow: BrowserWindow) {
         outputFile: msg.data.outputFile,
         format: msg.data.format,
         onComplete: (exitCode) => {
-          msg.reply('downloadAudioComplete', exitCode);
+          msg.reply('ytdlComplete', exitCode);
           msg.end();
         },
-        onProgress: (progress) => msg.reply('downloadAudioProgress', progress),
-        onError: (error) => msg.reply('downloadAudioError', error),
+        onUpdate: (update) => msg.reply('ytdlUpdate', update),
+        onError: (error) => msg.reply('ytdlError', error),
       };
       downloadAudio(msg.data.url, options);
+    }
+
+    if (typedIpcMain.is(msg, 'downloadVideo')) {
+      const options: YoutubeDlVideoOptions = {
+        outputFolder: msg.data.outputFolder,
+        outputFile: msg.data.outputFile,
+        format: msg.data.format,
+        onComplete: (exitCode) => {
+          msg.reply('ytdlComplete', exitCode);
+          msg.end();
+        },
+        onUpdate: (update) => msg.reply('ytdlUpdate', update),
+        onError: (error) => msg.reply('ytdlError', error),
+      };
+      downloadVideo(msg.data.url, options);
     }
 
     if (typedIpcMain.is(msg, 'pickPath')) {

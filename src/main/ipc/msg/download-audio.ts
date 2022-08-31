@@ -1,5 +1,5 @@
 import { IpcMsg } from '..';
-import { YoutubeDlProgress } from '../../youtube/types';
+import { YoutubeDlProgress } from '../../../utils/youtube/types';
 
 export type DownloadAudioMsg = IpcMsg<
   'downloadAudio',

@@ -2,10 +2,17 @@ import { spawn } from 'child_process';
 import { rename } from 'fs';
 import { basename, dirname, join } from 'path';
 import { sync as mkdirpSync } from 'mkdirp';
+import { DownloadState } from '../../interfaces/download';
 import { parseDownload } from './parser/download';
-import { YoutubeDlAudioOptions, YoutubeDlOptions } from './types';
-import { mainSettings } from '../settings';
+import {
+  YoutubeDlAudioOptions,
+  YoutubeDlOptions,
+  YoutubeDlVideoOptions,
+} from './types';
+import { mainSettings } from '../../main/settings';
 import { parseDestination } from './parser/destination';
+import { parseDownloadWebsite } from './parser/download-website';
+import { parseFfmpeg } from './parser/ffmpeg';
 
 export function downloadAudio(url: string, options: YoutubeDlAudioOptions) {
   const args = [
@@ -23,7 +30,20 @@ export function downloadAudio(url: string, options: YoutubeDlAudioOptions) {
     outputFile: options.outputFile,
     onComplete: options.onComplete,
     onError: options.onError,
-    onProgress: options.onProgress,
+    onUpdate: options.onUpdate,
+  });
+}
+
+export function downloadVideo(url: string, options: YoutubeDlVideoOptions) {
+  const args = ['-f', options.format || 'best', url];
+
+  youtubeDownload({
+    args,
+    outputFolder: options.outputFolder,
+    outputFile: options.outputFile,
+    onComplete: options.onComplete,
+    onError: options.onError,
+    onUpdate: options.onUpdate,
   });
 }
 
@@ -31,7 +51,7 @@ function youtubeDownload({
   args,
   outputFolder,
   outputFile,
-  onProgress,
+  onUpdate,
   onError,
   onComplete,
 }: YoutubeDlOptions) {
@@ -54,56 +74,66 @@ function youtubeDownload({
     let downloadDestination: string;
 
     const exeArgs = ['-o', outputArg, ...args];
-    console.log('ytdl:', {
-      useTemporalFolder: mainSettings.get('useTemporalFolder'),
-      temporalFolder: mainSettings.get('temporalFolder'),
-      downloadOutputPath: outputArg,
-      exeArgs,
-    });
     const child = spawn(exePath, exeArgs);
 
-    child.stdout.on('data', (data) => {
-      console.log(String(data));
+    child.stdout.on('data', (dataBuffer) => {
+      const data = String(dataBuffer);
+
       const destination = parseDestination(data);
       if (destination) {
         downloadDestination = destination;
       }
-      if (onProgress) {
-        const progress = parseDownload(data);
-        if (progress) onProgress(progress);
+      if (!onUpdate) return;
+
+      const webDl = parseDownloadWebsite(data);
+      if (webDl) {
+        onUpdate({ state: DownloadState.DOWNLOADING_WEBPAGE });
+      }
+
+      const progress = parseDownload(data);
+      if (progress) {
+        onUpdate(progress);
+      }
+
+      const ffmpegState = parseFfmpeg(data);
+      if (ffmpegState) {
+        onUpdate({ state: ffmpegState });
       }
     });
 
     child.stderr.on('data', (data) => {
-      console.log(`yt [error]: ${data}`);
+      console.log(`[stderr]: ${data}`);
       onError?.(data);
     });
 
     child.on('close', (code) => {
-      if (temporalFolder) {
-        const finalOutputPath = join(
-          outputFolder,
-          basename(downloadDestination)
-        );
-        console.log(
-          `Moving file from "${downloadDestination}" to ${finalOutputPath}`
-        );
-        try {
+      try {
+        console.log('[close]', code);
+
+        if (temporalFolder) {
+          const finalOutputPath = join(
+            outputFolder,
+            basename(downloadDestination)
+          );
+          console.log(
+            `Moving file from "${downloadDestination}" to ${finalOutputPath}`
+          );
+          onUpdate?.({ state: DownloadState.STORING });
           mkdirpSync(dirname(finalOutputPath));
           rename(downloadDestination, finalOutputPath, (err) => {
             if (err) {
-              onError?.(err.message);
+              throw new Error(err.message);
             }
             onComplete?.(code);
           });
-        } catch (e) {
-          onError?.(String(e));
+          return;
         }
-        return;
-      }
 
-      console.log('complete', code);
-      onComplete?.(code);
+        onComplete?.(code);
+      } catch (e) {
+        console.log('error =>', e);
+        onError?.(String(e));
+      }
     });
   } catch (e) {
     onError?.(String(e));

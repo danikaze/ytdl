@@ -1,9 +1,10 @@
 import type { OpenDialogOptions } from 'electron';
-import type { AppScreen } from '@interfaces/app';
 import type {
   YoutubeDlAudioFormat,
-  YoutubeDlProgress,
-} from '@main/youtube/types';
+  YoutubeDlUpdate,
+  YoutubeDlVideoFormat,
+} from '@utils/youtube/types';
+import type { AppScreen } from '@interfaces/app';
 import { Settings } from '@interfaces/settings';
 
 export interface IpcMessagesData {
@@ -16,9 +17,15 @@ export interface IpcMessagesData {
     outputFolder: string;
     outputFile: string;
   };
-  downloadAudioProgress: YoutubeDlProgress;
-  downloadAudioError: string;
-  downloadAudioComplete: number | null;
+  downloadVideo: {
+    url: string;
+    format: YoutubeDlVideoFormat;
+    outputFolder: string;
+    outputFile: string;
+  };
+  ytdlUpdate: YoutubeDlUpdate;
+  ytdlError: string;
+  ytdlComplete: number | null;
   pickPath: OpenDialogOptions;
   pickPathResult: string[] | undefined;
   initSettings: Settings;

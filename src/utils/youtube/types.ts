@@ -1,4 +1,16 @@
-import { Download } from '@interfaces/download';
+import type { Download } from '@interfaces/download';
+
+export function isStateUpdate(
+  update: YoutubeDlUpdate
+): update is YoutubeDlStateUpdate {
+  return (update as YoutubeDlStateUpdate).state !== undefined;
+}
+
+export function isProgressUpdate(
+  update: YoutubeDlUpdate
+): update is YoutubeDlProgress {
+  return (update as YoutubeDlProgress).percentage !== undefined;
+}
 
 export type YoutubeDlAudioFormat =
   | 'best'
@@ -59,16 +71,4 @@ export interface YoutubeDlProgress {
   eta: number | undefined;
   /** Size as reported (i.e. `"79.30KiB/s"`) */
   size: string | undefined;
-}
-
-export function isStateUpdate(
-  update: YoutubeDlUpdate
-): update is YoutubeDlStateUpdate {
-  return (update as YoutubeDlStateUpdate).state !== undefined;
-}
-
-export function isProgressUpdate(
-  update: YoutubeDlUpdate
-): update is YoutubeDlProgress {
-  return (update as YoutubeDlProgress).percentage !== undefined;
 }

@@ -4,7 +4,8 @@ import type {
   YoutubeDlAudioOptions,
   YoutubeDlVideoOptions,
 } from '../../utils/youtube/types';
-import { downloadAudio, downloadVideo } from '../../utils/youtube';
+import { downloadAudio } from '../../utils/youtube/download-audio';
+import { downloadVideo } from '../../utils/youtube/download-video';
 import { typedIpcMain } from '../../utils/ipc';
 import { mainSettings } from '../settings';
 

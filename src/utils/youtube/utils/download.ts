@@ -1,53 +1,17 @@
 import { spawn } from 'child_process';
 import { rename } from 'fs';
-import { basename, dirname, join } from 'path';
+import { join, basename, dirname } from 'path';
 import { sync as mkdirpSync } from 'mkdirp';
-import { DownloadState } from '../../interfaces/download';
-import { parseDownload } from './parser/download';
-import {
-  YoutubeDlAudioOptions,
-  YoutubeDlOptions,
-  YoutubeDlVideoOptions,
-} from './types';
-import { mainSettings } from '../../main/settings';
-import { parseDestination } from './parser/destination';
-import { parseDownloadWebsite } from './parser/download-website';
-import { parseFfmpeg } from './parser/ffmpeg';
+import { DownloadState } from '../../../interfaces/download';
+import { mainSettings } from '../../../main/settings';
+import { parseDestination } from '../parser/destination';
+import { parseDownload } from '../parser/download';
+import { parseDownloadWebsite } from '../parser/download-website';
+import { parseFfmpeg } from '../parser/ffmpeg';
+import { YoutubeDlOptions } from '../types';
+import { getExePath } from './get-exe-path';
 
-export function downloadAudio(url: string, options: YoutubeDlAudioOptions) {
-  const args = [
-    '--extract-audio',
-    '--audio-quality',
-    '0',
-    '--audio-format',
-    options.format || 'mp3',
-    url,
-  ];
-
-  youtubeDownload({
-    args,
-    outputFolder: options.outputFolder,
-    outputFile: options.outputFile,
-    onComplete: options.onComplete,
-    onError: options.onError,
-    onUpdate: options.onUpdate,
-  });
-}
-
-export function downloadVideo(url: string, options: YoutubeDlVideoOptions) {
-  const args = ['-f', options.format || 'best', url];
-
-  youtubeDownload({
-    args,
-    outputFolder: options.outputFolder,
-    outputFile: options.outputFile,
-    onComplete: options.onComplete,
-    onError: options.onError,
-    onUpdate: options.onUpdate,
-  });
-}
-
-function youtubeDownload({
+export function youtubeDownload({
   args,
   outputFolder,
   outputFile,
@@ -55,7 +19,7 @@ function youtubeDownload({
   onError,
   onComplete,
 }: YoutubeDlOptions) {
-  const exePath = getExePath('2021.12.17');
+  const exePath = getExePath();
   // console.log(`${basename(exePath)} ${args.join(' ')}`);
   try {
     if (args.includes('-o')) {
@@ -139,15 +103,4 @@ function youtubeDownload({
     onError?.(String(e));
     console.error(e);
   }
-}
-
-function getExePath(version: string): string {
-  const VERSION = '{{VERSION}}';
-  const filename = `youtube-dl-${VERSION}.exe`;
-  const folder =
-    process.env.NODE_ENV === 'development'
-      ? 'assets/bin'
-      : 'resources/assets/bin';
-
-  return join(folder, filename).replace(VERSION, version);
 }

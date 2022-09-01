@@ -72,3 +72,44 @@ export interface YoutubeDlProgress {
   /** Size as reported (i.e. `"79.30KiB/s"`) */
   size: string | undefined;
 }
+
+/* eslint-disable @typescript-eslint/naming-convention */
+export interface YoutubeDlMetadata {
+  // meta data
+  id: string;
+  display_id: string;
+  webpage_url: string;
+  webpage_url_basename: string;
+
+  // video data
+  thumbnail: string;
+  thumbnails: YoutubeDlMetadataThumbnail[];
+  title: string;
+  fulltitle: string;
+  duration: number; // seconds
+  fps: number;
+  vbr: number;
+  width: number;
+  height: number;
+  categories: string[];
+  tags: string[];
+
+  // sns data
+  like_count: 3819;
+  view_count: number;
+  uploader: string;
+  uploader_id: string;
+  uploader_url: string;
+  channel: string;
+  channel_id: string;
+  channel_url: string;
+}
+
+export interface YoutubeDlMetadataThumbnail {
+  id: string;
+  resolution: string;
+  url: string;
+  width: number;
+  height: number;
+}
+/* eslint-enable @typescript-eslint/naming-convention */

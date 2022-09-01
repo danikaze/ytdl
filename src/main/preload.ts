@@ -4,6 +4,7 @@ import { setupRendererIpc } from '@renderer/ipc';
 import { typedIpcRenderer } from '../utils/ipc';
 import {
   YoutubeDlAudioOptions,
+  YoutubeDlMetadata,
   YoutubeDlVideoOptions,
 } from '../utils/youtube/types';
 
@@ -64,6 +65,26 @@ const exposedYtdl = {
     });
 
     msg.send();
+  },
+
+  fetchMetadata: (url: string): Promise<YoutubeDlMetadata> => {
+    return new Promise<YoutubeDlMetadata>((resolve, reject) => {
+      const msg = typedIpcRenderer.createMessage('ytdl', 'fetchMetadata', {
+        url,
+      });
+
+      msg.onReply((response) => {
+        if (typedIpcRenderer.is(response, 'ytdlError')) {
+          reject(response.data);
+        }
+
+        if (typedIpcRenderer.is(response, 'fetchMetadataResult')) {
+          resolve(response.data);
+        }
+      });
+
+      msg.send();
+    });
   },
 
   pickFile: (dialogOptions: OpenDialogOptions) => {

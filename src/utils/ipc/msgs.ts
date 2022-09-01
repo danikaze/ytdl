@@ -1,6 +1,7 @@
 import type { OpenDialogOptions } from 'electron';
 import type {
   YoutubeDlAudioFormat,
+  YoutubeDlMetadata,
   YoutubeDlUpdate,
   YoutubeDlVideoFormat,
 } from '@utils/youtube/types';
@@ -23,6 +24,10 @@ export interface IpcMessagesData {
     outputFolder: string;
     outputFile: string;
   };
+  fetchMetadata: {
+    url: string;
+  };
+  fetchMetadataResult: YoutubeDlMetadata;
   ytdlUpdate: YoutubeDlUpdate;
   ytdlError: string;
   ytdlComplete: number | null;

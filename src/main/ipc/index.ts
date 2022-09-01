@@ -6,6 +6,7 @@ import type {
 } from '../../utils/youtube/types';
 import { downloadAudio } from '../../utils/youtube/download-audio';
 import { downloadVideo } from '../../utils/youtube/download-video';
+import { fetchMetadata } from '../../utils/youtube/fetch-metadata';
 import { typedIpcMain } from '../../utils/ipc';
 import { mainSettings } from '../settings';
 
@@ -48,6 +49,15 @@ export function setupMainIpc(mainWindow: BrowserWindow) {
         onError: (error) => msg.reply('ytdlError', error),
       };
       downloadVideo(msg.data.url, options);
+    }
+
+    if (typedIpcMain.is(msg, 'fetchMetadata')) {
+      try {
+        const data = await fetchMetadata(msg.data.url);
+        msg.reply('fetchMetadataResult', data);
+      } catch (error) {
+        msg.reply('ytdlError', String(error));
+      }
     }
 
     if (typedIpcMain.is(msg, 'pickPath')) {

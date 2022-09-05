@@ -13,7 +13,7 @@ export function usePathPicker({
     if (disabled) return;
     const paths = await window.ytdl.pickFile(dialogOptions);
     setCurrentPath(paths ? paths.join(', ') : '');
-    onChange(paths);
+    onChange?.(paths);
   }
 
   return { currentPath, showPickDialog };

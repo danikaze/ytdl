@@ -1,3 +1,4 @@
+import { forwardRef } from 'react';
 import type { OpenDialogOptions } from 'electron';
 import { clsx } from 'clsx';
 import { Button, TextInput } from 'evergreen-ui';
@@ -11,36 +12,39 @@ export interface Props {
   disabled?: boolean;
   dialogOptions: OpenDialogOptions;
   defaultValue?: string;
-  onChange: (path: readonly string[] | undefined) => void;
+  onChange?: (path: readonly string[] | undefined) => void;
   className?: string;
 }
 
-export function PathPicker(props: Props): JSX.Element {
-  const { showPickDialog, currentPath } = usePathPicker(props);
-  const { className, placeholder, disabled } = props;
+export const PathPicker = forwardRef<HTMLInputElement, Props>(
+  function PathPicker(props, ref) {
+    const { showPickDialog, currentPath } = usePathPicker(props);
+    const { className, placeholder, disabled } = props;
 
-  return (
-    <div className={clsx(styles.root, className)}>
-      <TextInput
-        readOnly
-        placeholder={placeholder}
-        flexGrow={1}
-        borderTopRightRadius={0}
-        borderBottomRightRadius={0}
-        value={currentPath}
-      />
-      <Button
-        disabled={disabled}
-        borderTopLeftRadius={0}
-        borderBottomLeftRadius={0}
-        onClick={showPickDialog}
-        fontWeight={400}
-      >
-        {getLabel(props)}
-      </Button>
-    </div>
-  );
-}
+    return (
+      <div className={clsx(styles.root, className)}>
+        <TextInput
+          readOnly
+          placeholder={placeholder}
+          flexGrow={1}
+          borderTopRightRadius={0}
+          borderBottomRightRadius={0}
+          value={currentPath}
+          ref={ref}
+        />
+        <Button
+          disabled={disabled}
+          borderTopLeftRadius={0}
+          borderBottomLeftRadius={0}
+          onClick={showPickDialog}
+          fontWeight={400}
+        >
+          {getLabel(props)}
+        </Button>
+      </div>
+    );
+  }
+);
 
 function getLabel({ label, dialogOptions }: Props): string {
   if (label) return label;

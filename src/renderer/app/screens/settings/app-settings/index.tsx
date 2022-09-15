@@ -4,13 +4,13 @@ import { SettingsSection } from '@renderer/components/settings-section';
 import { SettingsItem } from '@renderer/components/settings-item';
 
 export function AppSettings() {
-  const { settings } = useSettings();
+  const { getSetting } = useSettings();
 
   return (
     <Pane role="tabpanel">
       <SettingsSection title="App">
         <SettingsItem title="youtube-dl version">
-          <Text>{settings.youtubeDlVersion}</Text>
+          <Text>{getSetting('app.youtubeDlVersion')}</Text>
         </SettingsItem>
       </SettingsSection>
     </Pane>

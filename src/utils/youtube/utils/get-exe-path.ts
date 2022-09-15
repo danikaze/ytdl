@@ -3,7 +3,7 @@ import { join } from 'path';
 import { mainSettings } from '../../../main/settings';
 
 export function getExePath(): string {
-  const version = mainSettings.get('youtubeDlVersion');
+  const version = mainSettings.get('app.youtubeDlVersion');
 
   if (!version) {
     throw new Error('youtubeDlVersion is not defined');

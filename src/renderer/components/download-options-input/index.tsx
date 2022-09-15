@@ -1,4 +1,4 @@
-import { DownloadType } from '@renderer/jotai/download-options';
+import { DownloadType } from '@interfaces/settings';
 import { Heading, Pane, Select, Text, TextInput } from 'evergreen-ui';
 import { DownloadOptionsInputAudio } from '../download-options-input-audio';
 import { DownloadOptionsInputVideo } from '../download-options-input-video';
@@ -40,7 +40,7 @@ export function DownloadOptionsInput(): JSX.Element {
       <Heading size={500} marginBottom={8}>
         Download as
       </Heading>
-      <Select onChange={onTypeChange}>
+      <Select defaultValue={downloadType} onChange={onTypeChange}>
         <option value="video">Video</option>
         <option value="audio">Audio only</option>
       </Select>

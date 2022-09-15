@@ -1,27 +1,44 @@
 import { ChangeEvent } from 'react';
 import { useSettings } from '@renderer/jotai/settings';
+import { Settings } from '@interfaces/settings';
 
 export function useDownloadSettings() {
-  const { settings, updateSetting } = useSettings();
+  const { getSetting, updateSetting } = useSettings();
 
   function updateDownloadsFolder(paths: readonly string[] | undefined): void {
     if (!paths) return;
-    updateSetting('downloadFolder', paths[0]);
+    updateSetting('downloads.downloadFolder', paths[0]);
   }
 
   function updateTemporalFolder(paths: readonly string[] | undefined): void {
     if (!paths) return;
-    updateSetting('temporalFolder', paths[0]);
+    updateSetting('downloads.temporalFolder', paths[0]);
   }
 
   function updateUseTemporalFolder(ev: ChangeEvent<HTMLInputElement>): void {
-    updateSetting('useTemporalFolder', ev.target.checked);
+    updateSetting('downloads.useTemporalFolder', ev.target.checked);
   }
 
+  function updateDownloadType(ev: ChangeEvent<HTMLSelectElement>): void {
+    updateSetting(
+      'downloads.downloadType',
+      ev.target.value as Settings['downloads.downloadType']
+    );
+  }
+
+  const initialDownloadFolder = getSetting('downloads.downloadFolder', true);
+  const useTemporalFolder = getSetting('downloads.useTemporalFolder');
+  const initialTemporalFolder = getSetting('downloads.temporalFolder');
+  const downloadType = getSetting('downloads.downloadType', false);
+
   return {
-    settings,
+    initialDownloadFolder,
+    useTemporalFolder,
+    initialTemporalFolder,
+    downloadType,
     updateDownloadsFolder,
     updateTemporalFolder,
     updateUseTemporalFolder,
+    updateDownloadType,
   };
 }

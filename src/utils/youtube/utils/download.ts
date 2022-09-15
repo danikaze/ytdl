@@ -29,8 +29,8 @@ export function youtubeDownload({
     }
 
     const temporalFolder =
-      mainSettings.get('useTemporalFolder') &&
-      mainSettings.get('temporalFolder');
+      mainSettings.get('downloads.useTemporalFolder') &&
+      mainSettings.get('downloads.temporalFolder');
     const outputArg = join(
       temporalFolder || outputFolder,
       `${outputFile}.%(ext)s`

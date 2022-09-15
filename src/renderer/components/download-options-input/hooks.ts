@@ -1,8 +1,6 @@
 import { ChangeEvent, useCallback } from 'react';
-import {
-  useDownloadOptions,
-  DownloadType,
-} from '@renderer/jotai/download-options';
+import { useDownloadOptions } from '@renderer/jotai/download-options';
+import { DownloadType } from '@interfaces/settings';
 
 export function useDownloadOptionsInput() {
   const {

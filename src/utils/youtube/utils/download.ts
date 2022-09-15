@@ -65,7 +65,8 @@ export function youtubeDownload({
       }
     });
 
-    child.stderr.on('data', (data) => {
+    child.stderr.on('data', (dataBuffer) => {
+      const data = String(dataBuffer);
       console.log(`[stderr]: ${data}`);
       onError?.(data);
     });

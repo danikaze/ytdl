@@ -79,8 +79,16 @@ export function useDownloads() {
           eta: undefined,
         });
       },
-      onComplete: () => {
+      onComplete: (code) => {
         // console.log('[onComplete]');
+        if (code) {
+          updateDownload(id, {
+            state: DownloadState.ERRORED,
+            speed: undefined,
+            eta: undefined,
+          });
+          return;
+        }
         updateDownload(id, {
           state: DownloadState.COMPLETED,
           downloadPctg: 100,

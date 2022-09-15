@@ -1,7 +1,7 @@
-import { Download } from '@interfaces/download';
+import { Download, DownloadState } from '@interfaces/download';
 import { useYtdlTheme } from '@renderer/themes';
 import { formatSpeed, formatTime } from '@utils/format';
-import { StatusIndicator, Table } from 'evergreen-ui';
+import { StatusIndicator, Table, Tooltip } from 'evergreen-ui';
 import { TABLE_COLS } from '../download-list/constants';
 import { ProgressBar } from '../progress-bar';
 
@@ -19,19 +19,16 @@ export function DownloadItem({
   size,
   speed,
   eta,
+  error,
 }: Props): JSX.Element {
-  const theme = useYtdlTheme();
   const formattedSpeed = formatSpeed(speed);
   const formattedEta = formatTime(eta);
 
   return (
     <Table.Row height={32}>
-      <Table.TextCell {...TABLE_COLS.index}>{index}</Table.TextCell>
+      <Table.TextCell {...TABLE_COLS.index}>{index + 1}</Table.TextCell>
       <Table.TextCell {...TABLE_COLS.url}>
-        <StatusIndicator
-          color={theme.components.DownloadState[state]}
-          margin={0}
-        />
+        {renderStatusIcon(state, error)}
         <a className={styles.url} href={url} target="_blank" rel="noreferrer">
           {url}
         </a>
@@ -43,5 +40,19 @@ export function DownloadItem({
       <Table.TextCell {...TABLE_COLS.speed}>{formattedSpeed}</Table.TextCell>
       <Table.TextCell {...TABLE_COLS.eta}>{formattedEta}</Table.TextCell>
     </Table.Row>
+  );
+}
+
+function renderStatusIcon(state: DownloadState, error?: string): JSX.Element {
+  const theme = useYtdlTheme();
+
+  const icon = (
+    <StatusIndicator color={theme.components.DownloadState[state]} margin={0} />
+  );
+
+  return state === DownloadState.ERRORED && error ? (
+    <Tooltip content={error}>{icon}</Tooltip>
+  ) : (
+    icon
   );
 }

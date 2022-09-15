@@ -59,7 +59,7 @@ export function useDownloadOptions() {
         format: getSetting('downloads.audio.audioFormat', true),
       },
       downloadVideoOptions: {
-        format: 'best',
+        format: getSetting('downloads.video.videoFormat', true),
       },
     });
     try {
@@ -141,6 +141,16 @@ export function useDownloadOptions() {
     key: K,
     value: YoutubeDlVideoOptions[K]
   ) {
+    // update last values if needed
+    if (value !== undefined) {
+      if (key === 'format') {
+        updateSetting(
+          'last.downloads.video.videoFormat',
+          value as Exclude<YoutubeDlVideoOptions['format'], undefined>
+        );
+      }
+    }
+    // update the modal
     setModal((currentModal) => ({
       ...currentModal,
       downloadVideoOptions: {

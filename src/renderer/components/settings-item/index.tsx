@@ -26,8 +26,10 @@ export function SettingsItem({
 function getDescription(description: string | undefined): ReactNode {
   if (!description) return undefined;
   return (
-    <Text size={300} paddingBottom={16}>
-      {description}
-    </Text>
+    <Pane>
+      <Text size={300} paddingBottom={16}>
+        {description}
+      </Text>
+    </Pane>
   );
 }

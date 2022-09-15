@@ -1,4 +1,5 @@
 import { atom, useAtom } from 'jotai';
+import type { DownloadType } from '@interfaces/settings';
 import {
   YoutubeDlAudioOptions,
   YoutubeDlMetadata,
@@ -6,8 +7,6 @@ import {
   YoutubeDlVideoOptions,
 } from '@utils/youtube/types';
 import { useSettings } from './settings';
-
-export type DownloadType = 'audio' | 'video';
 
 interface ModalState {
   url: string;
@@ -44,20 +43,20 @@ const rawModal = atom<ModalState>({
 
 export function useDownloadOptions() {
   const [modal, setModal] = useAtom(rawModal);
-  const { settings } = useSettings();
+  const { getSetting, updateSetting } = useSettings();
 
   async function openModal(url: string) {
     setModal({
       url,
       show: true,
       metadata: undefined,
-      downloadType: 'video',
+      downloadType: getSetting('downloads.downloadType', true),
       downloadOptions: {
         outputFile: '%(title)s',
-        outputFolder: settings.downloadFolder,
+        outputFolder: getSetting('downloads.downloadFolder', true),
       },
       downloadAudioOptions: {
-        format: 'best',
+        format: getSetting('downloads.audio.audioFormat', true),
       },
       downloadVideoOptions: {
         format: 'best',
@@ -97,6 +96,7 @@ export function useDownloadOptions() {
   }
 
   function selectDownloadOutputFolder(folder: string) {
+    updateSetting('last.downloads.downloadFolder', folder);
     setModal((currentModal) => ({
       ...currentModal,
       downloadOptions: {
@@ -107,6 +107,7 @@ export function useDownloadOptions() {
   }
 
   function selectDownloadType(type: DownloadType) {
+    updateSetting('last.downloads.downloadType', type);
     setModal((currentModal) => ({
       ...currentModal,
       downloadType: type,
@@ -117,6 +118,16 @@ export function useDownloadOptions() {
     key: K,
     value: YoutubeDlAudioOptions[K]
   ) {
+    // update last values if needed
+    if (value !== undefined) {
+      if (key === 'format') {
+        updateSetting(
+          'last.downloads.audio.audioFormat',
+          value as Exclude<YoutubeDlAudioOptions['format'], undefined>
+        );
+      }
+    }
+    // update the modal
     setModal((currentModal) => ({
       ...currentModal,
       downloadAudioOptions: {

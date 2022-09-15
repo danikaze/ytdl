@@ -1,4 +1,7 @@
-import type { YoutubeDlAudioFormat } from '@utils/youtube/types';
+import type {
+  YoutubeDlAudioFormat,
+  YoutubeDlVideoFormat,
+} from '@utils/youtube/types';
 
 export const LAST_VALUE = '_LAST_';
 export type LastValue = typeof LAST_VALUE;
@@ -14,11 +17,13 @@ export type Settings = WithLastValues<
     'downloads.temporalFolder': string;
     'downloads.downloadType': DownloadType;
     'downloads.audio.audioFormat': YoutubeDlAudioFormat;
+    'downloads.video.videoFormat': YoutubeDlVideoFormat;
   },
   // list of settings with "last used"
   | 'downloads.downloadFolder'
   | 'downloads.downloadType'
   | 'downloads.audio.audioFormat'
+  | 'downloads.video.videoFormat'
 >;
 
 type WithLastValues<S extends {}, K extends keyof S & string> = {

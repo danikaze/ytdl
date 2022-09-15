@@ -11,9 +11,11 @@ export const mainSettings = new MainSettings({
     'downloads.temporalFolder': './temp',
     'downloads.downloadType': LAST_VALUE,
     'downloads.audio.audioFormat': LAST_VALUE,
+    'downloads.video.videoFormat': LAST_VALUE,
     // latest used values
     'last.downloads.downloadFolder': './downloads',
     'last.downloads.downloadType': 'audio',
     'last.downloads.audio.audioFormat': 'best',
+    'last.downloads.video.videoFormat': 'best',
   },
 });

@@ -1,8 +1,8 @@
-import { IpcMessagesData } from './msgs';
+import type { WindowIds } from '@interfaces/app';
+import type { IpcMessagesData } from './msgs';
 import { TypedIpcMain } from './private/main';
 import { TypedIpcRenderer } from './private/renderer';
 
-export type WindowIds = 'main';
 export type IpcChannel = 'ytdl';
 
 export const typedIpcMain = new TypedIpcMain<

@@ -17,6 +17,7 @@ import { typedIpcMain } from '../utils/ipc';
 import { resolveHtmlPath } from './utils/resolve-html-path';
 import { setupMainIpc } from './ipc';
 import { mainSettings } from './settings';
+import { createPositionedWindow } from './utils/create-positioned-window';
 
 class AppUpdater {
   constructor() {
@@ -66,7 +67,7 @@ const createWindow = async () => {
     return path.join(RESOURCES_PATH, ...paths);
   };
 
-  mainWindow = new BrowserWindow({
+  mainWindow = createPositionedWindow('main', {
     show: false,
     width: 1024,
     height: 728,

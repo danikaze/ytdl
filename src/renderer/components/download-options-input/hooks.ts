@@ -4,6 +4,8 @@ import { DownloadType } from '@interfaces/settings';
 
 export function useDownloadOptionsInput() {
   const {
+    filename,
+    isValidFilename,
     downloadType,
     downloadOptions,
     selectDownloadOutputFile,
@@ -33,6 +35,8 @@ export function useDownloadOptionsInput() {
   );
 
   return {
+    filename,
+    isValidFilename,
     downloadType,
     outputFile: downloadOptions.outputFile,
     outputFolder: downloadOptions.outputFolder,

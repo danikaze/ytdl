@@ -1,13 +1,25 @@
+import {
+  ArchiveIcon,
+  ErrorIcon,
+  Heading,
+  Pane,
+  Select,
+  Text,
+  TextInput,
+} from 'evergreen-ui';
 import { DownloadType } from '@interfaces/settings';
-import { Heading, Pane, Select, Text, TextInput } from 'evergreen-ui';
+import { useYtdlTheme, YtdlTheme } from '@renderer/themes';
 import { DownloadOptionsInputAudio } from '../download-options-input-audio';
 import { DownloadOptionsInputVideo } from '../download-options-input-video';
 import { PathPicker } from '../path-picker';
 import { useDownloadOptionsInput } from './hooks';
 
 export function DownloadOptionsInput(): JSX.Element {
+  const theme = useYtdlTheme();
   const {
     downloadType,
+    filename,
+    isValidFilename,
     outputFile,
     outputFolder,
     onFileChange,
@@ -21,11 +33,14 @@ export function DownloadOptionsInput(): JSX.Element {
         Filename
       </Heading>
       <Text size={300}>File extension is not required.</Text>
-      <TextInput
-        placeholder="Name for the downloaded file"
-        defaultValue={outputFile}
-        onChange={onFileChange}
-      />
+      <Pane>
+        <TextInput
+          placeholder="Name for the downloaded file"
+          defaultValue={filename}
+          onChange={onFileChange}
+        />
+      </Pane>
+      {renderOutputFile(outputFile, isValidFilename, theme)}
 
       <Heading size={500} marginBottom={8}>
         Destination folder
@@ -59,5 +74,21 @@ function renderDlTypeInput(type: DownloadType): JSX.Element | null {
         <DownloadOptionsInputVideo />
       </Pane>
     </>
+  );
+}
+
+function renderOutputFile(
+  outputFile: string,
+  isValid: boolean,
+  theme: YtdlTheme
+): JSX.Element {
+  const Icon = isValid ? ArchiveIcon : ErrorIcon;
+  const color = isValid ? theme.intents.info : theme.intents.danger;
+
+  return (
+    <Pane display="flex" alignItems="center">
+      <Icon color={color.icon} size={14} marginRight={8} />{' '}
+      <Text color={color.text}>{outputFile}</Text>
+    </Pane>
   );
 }

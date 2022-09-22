@@ -1,4 +1,4 @@
-import { ChangeEvent, useCallback } from 'react';
+import { ChangeEvent, useCallback, useRef } from 'react';
 import { useDownloadOptions } from '@renderer/jotai/download-options';
 import { DownloadType } from '@interfaces/settings';
 
@@ -12,6 +12,8 @@ export function useDownloadOptionsInput() {
     selectDownloadOutputFolder,
     selectDownloadType,
   } = useDownloadOptions();
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const onFileChange = useCallback(
     (ev: ChangeEvent<HTMLInputElement>) => {
@@ -34,7 +36,26 @@ export function useDownloadOptionsInput() {
     [selectDownloadType]
   );
 
+  const insertOnFileInput = useCallback(
+    (str: string): void => {
+      const input = fileInputRef.current;
+      if (!input) return;
+      const start = input.selectionStart;
+      const end = input.selectionEnd;
+      if (start === null || end === null) {
+        input.value += str;
+      } else {
+        const pre = input.value.substring(0, start);
+        const post = input.value.substring(end);
+        input.value = `${pre}${str}${post}`;
+      }
+      selectDownloadOutputFile(input.value);
+    },
+    [fileInputRef, selectDownloadOutputFile]
+  );
+
   return {
+    fileInputRef,
     filename,
     isValidFilename,
     downloadType,
@@ -43,5 +64,6 @@ export function useDownloadOptionsInput() {
     onFileChange,
     onFolderChange,
     onTypeChange,
+    insertOnFileInput,
   };
 }

@@ -1,11 +1,16 @@
 import {
   ArchiveIcon,
+  ArrayStringIcon,
+  Button,
   ErrorIcon,
   Heading,
   Pane,
+  Popover,
+  Position,
   Select,
   Text,
   TextInput,
+  Tooltip,
 } from 'evergreen-ui';
 import { DownloadType } from '@interfaces/settings';
 import { useYtdlTheme, YtdlTheme } from '@renderer/themes';
@@ -13,10 +18,12 @@ import { DownloadOptionsInputAudio } from '../download-options-input-audio';
 import { DownloadOptionsInputVideo } from '../download-options-input-video';
 import { PathPicker } from '../path-picker';
 import { useDownloadOptionsInput } from './hooks';
+import { MetadataMenu } from './metadata-menu';
 
 export function DownloadOptionsInput(): JSX.Element {
   const theme = useYtdlTheme();
   const {
+    fileInputRef,
     downloadType,
     filename,
     isValidFilename,
@@ -25,6 +32,7 @@ export function DownloadOptionsInput(): JSX.Element {
     onFileChange,
     onFolderChange,
     onTypeChange,
+    insertOnFileInput,
   } = useDownloadOptionsInput();
 
   return (
@@ -33,12 +41,28 @@ export function DownloadOptionsInput(): JSX.Element {
         Filename
       </Heading>
       <Text size={300}>File extension is not required.</Text>
-      <Pane>
+      <Pane display="flex">
         <TextInput
+          ref={fileInputRef}
           placeholder="Name for the downloaded file"
           defaultValue={filename}
           onChange={onFileChange}
+          borderTopRightRadius={0}
+          borderBottomRightRadius={0}
         />
+        <Popover
+          position={Position.BOTTOM_LEFT}
+          content={<MetadataMenu onSelect={insertOnFileInput} />}
+        >
+          <Button borderTopLeftRadius={0} borderBottomLeftRadius={0}>
+            <Tooltip
+              content="Display list of available metadata"
+              position={Position.TOP}
+            >
+              <ArrayStringIcon />
+            </Tooltip>
+          </Button>
+        </Popover>
       </Pane>
       {renderOutputFile(outputFile, isValidFilename, theme)}
 

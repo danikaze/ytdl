@@ -1,5 +1,6 @@
 import { contextBridge, OpenDialogOptions } from 'electron';
 import type { Settings } from '@interfaces/settings';
+import { DownloadPostProcessOptions } from '@interfaces/download';
 import { setupRendererIpc } from '@renderer/ipc';
 import { typedIpcRenderer } from '../utils/ipc';
 import {
@@ -13,12 +14,18 @@ export type ElectronYtdl = typeof exposedYtdl;
 const exposedYtdl = {
   setupIpc: setupRendererIpc,
 
-  downloadAudio: (url: string, options: YoutubeDlAudioOptions) => {
+  downloadAudio: (
+    url: string,
+    options: YoutubeDlAudioOptions & {
+      postProcess?: DownloadPostProcessOptions;
+    }
+  ) => {
     const msg = typedIpcRenderer.createMessage('ytdl', 'downloadAudio', {
       url,
       outputFolder: options.outputFolder,
       outputFile: options.outputFile,
       format: options.format || 'mp3',
+      postProcess: options.postProcess,
     });
 
     msg.onReply((response) => {

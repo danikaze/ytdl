@@ -1,6 +1,10 @@
 import { atom, useAtom } from 'jotai';
 import { nanoid } from 'nanoid';
-import { Download, DownloadState } from '@interfaces/download';
+import {
+  Download,
+  DownloadPostProcessOptions,
+  DownloadState,
+} from '@interfaces/download';
 import {
   isProgressUpdate,
   isStateUpdate,
@@ -12,7 +16,10 @@ const rawDownloads = atom<Download[]>([]);
 
 type DownloadCallbackList = 'onUpdate' | 'onError' | 'onComplete';
 type DownloadCallbacks = Pick<YoutubeDlVideoOptions, DownloadCallbackList>;
-type DownloadAudioOptions = Omit<YoutubeDlAudioOptions, DownloadCallbackList>;
+type DownloadAudioOptions = Omit<
+  YoutubeDlAudioOptions,
+  DownloadCallbackList
+> & { postProcess?: DownloadPostProcessOptions };
 type DownloadVideoOptions = Omit<YoutubeDlVideoOptions, DownloadCallbackList>;
 
 export function useDownloads() {
@@ -100,7 +107,7 @@ export function useDownloads() {
   }
 
   function addAudioDownload(url: string, options: DownloadAudioOptions) {
-    const id = addDownload({ url });
+    const id = addDownload({ url, postProcess: options.postProcess || {} });
     window.ytdl.downloadAudio(url, {
       ...options,
       ...getDownloadCallbacks(id),
@@ -108,7 +115,7 @@ export function useDownloads() {
   }
 
   function addVideoDownload(url: string, options: DownloadVideoOptions) {
-    const id = addDownload({ url });
+    const id = addDownload({ url, postProcess: {} });
     window.ytdl.downloadVideo(url, {
       ...options,
       ...getDownloadCallbacks(id),

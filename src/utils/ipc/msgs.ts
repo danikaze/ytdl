@@ -6,6 +6,7 @@ import type {
   YoutubeDlVideoFormat,
 } from '@utils/youtube/types';
 import type { AppScreen } from '@interfaces/app';
+import { DownloadPostProcessOptions } from '@interfaces/download';
 import { Settings } from '@interfaces/settings';
 
 export interface IpcMessagesData {
@@ -17,6 +18,7 @@ export interface IpcMessagesData {
     format: YoutubeDlAudioFormat;
     outputFolder: string;
     outputFile: string;
+    postProcess?: DownloadPostProcessOptions;
   };
   downloadVideo: {
     url: string;

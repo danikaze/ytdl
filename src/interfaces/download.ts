@@ -1,3 +1,5 @@
+import type { Tags } from 'node-id3';
+
 export const enum DownloadState {
   INITIALIZATING,
   DOWNLOADING_WEBPAGE,
@@ -19,4 +21,13 @@ export interface Download {
   speed?: number;
   eta?: number;
   error?: string;
+  postProcess: DownloadPostProcessOptions;
+}
+
+export interface DownloadPostProcessOptions {
+  audio?: AudioProcessOptions;
+}
+
+export interface AudioProcessOptions {
+  metadata?: Tags;
 }

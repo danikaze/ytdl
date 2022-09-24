@@ -1,4 +1,5 @@
 import { atom, useAtom } from 'jotai';
+import { DownloadPostProcessOptions } from '@interfaces/download';
 import type { DownloadType } from '@interfaces/settings';
 import { isValidFilename } from '@utils/is-valid-filename';
 import { replaceMetadata } from '@utils/youtube/replace-metadata';
@@ -31,6 +32,7 @@ interface ModalState {
     YoutubeDlVideoOptions,
     'outputFile' | 'outputFolder'
   >;
+  postProcessOptions: DownloadPostProcessOptions;
   error?: string;
 }
 
@@ -50,6 +52,7 @@ const rawModal = atom<ModalState>({
   downloadVideoOptions: {
     format: 'best',
   },
+  postProcessOptions: {},
 });
 
 export function useDownloadOptions() {
@@ -78,6 +81,7 @@ export function useDownloadOptions() {
       downloadVideoOptions: {
         format: getSetting('downloads.video.videoFormat', true),
       },
+      postProcessOptions: {},
     });
 
     try {
@@ -191,6 +195,18 @@ export function useDownloadOptions() {
     }));
   }
 
+  function updateDownloadPostProcessOptions<
+    K extends keyof DownloadPostProcessOptions
+  >(key: K, value: Partial<DownloadPostProcessOptions[K]>) {
+    setModal((currentModal) => ({
+      ...currentModal,
+      postProcessOptions: {
+        ...currentModal.postProcessOptions,
+        [key]: value,
+      },
+    }));
+  }
+
   return {
     open: openModal,
     close: closeModal,
@@ -198,6 +214,7 @@ export function useDownloadOptions() {
     selectDownloadOutputFolder,
     updateDownloadAudioOptions,
     updateDownloadVideoOptions,
+    updateDownloadPostProcessOptions,
     selectDownloadType,
     filename: modal.filename,
     isValidFilename: modal.isValidFilename,
@@ -205,6 +222,7 @@ export function useDownloadOptions() {
     downloadOptions: modal.downloadOptions,
     downloadAudioOptions: modal.downloadAudioOptions,
     downloadVideoOptions: modal.downloadVideoOptions,
+    postProcess: modal.postProcessOptions,
     url: modal.url,
     isVisible: modal.show,
     metadata: modal.metadata,

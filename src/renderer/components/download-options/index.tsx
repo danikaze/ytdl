@@ -14,6 +14,7 @@ export function DownloadOptions(): JSX.Element {
       downloadAudio(modal.url, {
         ...modal.downloadOptions,
         ...modal.downloadAudioOptions,
+        postProcess: modal.postProcess,
       });
     } else {
       downloadVideo(modal.url, {

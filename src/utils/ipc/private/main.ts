@@ -1,5 +1,7 @@
+import colors from 'colors/safe';
 import { BrowserWindow, ipcMain, IpcMainEvent, WebContents } from 'electron';
 import { removeFromArray } from '../../remove-from-array';
+import type { TypedIpcOptions } from '..';
 import { END_MSG_TYPE, isValidMessage, TypeDataMapping } from '.';
 import {
   createIpcMainIncomingMessage,
@@ -75,6 +77,12 @@ export class TypedIpcMain<
     IpcMessageHandlerWrapper<W, C, TDM>
   > = new Map();
 
+  private readonly log: boolean;
+
+  public constructor({ log }: TypedIpcOptions = {}) {
+    this.log = log || false;
+  }
+
   public registerTarget(targetId: W, window: BrowserWindow): void {
     this.windows.set(targetId, window);
   }
@@ -118,6 +126,7 @@ export class TypedIpcMain<
     if (!window) {
       throw new Error(`Target ${targetId} has not been set`);
     }
+
     return createIpcMainMessage(this, window.webContents, channel, type, data);
   }
 
@@ -185,6 +194,15 @@ export class TypedIpcMain<
       if (id && id !== msg.id) return;
       if (type && type !== msg.type) return;
 
+      if (this.log) {
+        console.log(`${colors.blue('Incoming IPC')}`, {
+          channel: msg.channel,
+          id: msg.id,
+          type: msg.type,
+          data: msg.data,
+        });
+      }
+
       if (once) {
         this.off(channel, handler);
       }
@@ -210,15 +228,20 @@ export class TypedIpcMain<
         event.sender,
         channel,
         data.type,
-        data.data as TDM[keyof TDM]
+        data.data as TDM[keyof TDM],
+        this.log
       );
 
       // if the message was sent with `.end()`, then remove all handlers
       // attached to that message `id`
       if (data.type === END_MSG_TYPE) {
+        if (this.log) {
+          console.log(`${colors.blue('IPC end')}`, msg);
+        }
         const idHandlers = this.getIdHandlers(data.id);
         for (let i = 0; i < idHandlers.length; i++) {
           this.off(channel, idHandlers[i]);
+          idHandlers[i](msg);
         }
         this.idHandlers.delete(data.id);
         return;

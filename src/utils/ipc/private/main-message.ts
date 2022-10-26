@@ -1,3 +1,4 @@
+import colors from 'colors/safe';
 import type { WebContents } from 'electron';
 import { END_MSG_TYPE, IpcMessage, TypeDataMapping } from '.';
 import type { TypedIpcMain, IpcMainMessageHandler } from './main';
@@ -49,7 +50,8 @@ export function createIpcMainIncomingMessage<
   target: WebContents,
   channel: C,
   type: T,
-  data?: TDM[T]
+  data?: TDM[T],
+  log?: boolean
 ): IpcMainIncomingMessage<W, C, TDM, T> {
   return new IpcMainMessageClass<W, C, TDM, T>(
     ipc,
@@ -57,7 +59,8 @@ export function createIpcMainIncomingMessage<
     channel,
     type,
     data,
-    id
+    id,
+    log
   );
 }
 
@@ -83,7 +86,15 @@ class IpcMainMessageClass<
 
   public type: T;
 
-  private ipc: TypedIpcMain<W, C, TDM>;
+  private readonly handlersMap: Map<
+    | IpcMainMessageHandler<W, C, never, never>
+    | IpcMainMessageHandler<W, C, TDM, keyof TDM>,
+    IpcMainMessageHandler<W, C, TDM, keyof TDM>
+  > = new Map();
+
+  private readonly ipc: TypedIpcMain<W, C, TDM>;
+
+  private readonly log: boolean;
 
   constructor(
     ipc: TypedIpcMain<W, C, TDM>,
@@ -91,7 +102,8 @@ class IpcMainMessageClass<
     channel: C,
     type: T,
     data?: TDM[T],
-    id?: string
+    id?: string,
+    log?: boolean
   ) {
     this.ipc = ipc;
     this.target = target;
@@ -99,6 +111,7 @@ class IpcMainMessageClass<
     this.id = id || IpcMainMessageClass.generateMsgId();
     this.type = type;
     this.data = data!;
+    this.log = log || false;
   }
 
   private static generateMsgId(): string {
@@ -113,6 +126,14 @@ class IpcMainMessageClass<
       type: this.type,
       data: this.data,
     };
+
+    if (this.log) {
+      console.log(`${colors.red('Sending IPC')}`, {
+        channel: this.channel,
+        ...msg,
+      });
+    }
+
     this.target.send(this.channel, msg);
   }
 
@@ -122,6 +143,14 @@ class IpcMainMessageClass<
       type,
       data,
     };
+
+    if (this.log) {
+      console.log(`${colors.red('Replying IPC')}`, {
+        channel: this.channel,
+        ...msg,
+      });
+    }
+
     this.target.send(this.channel, msg);
   }
 
@@ -129,13 +158,21 @@ class IpcMainMessageClass<
     handler: IpcMainMessageHandler<W, C, TDM, keyof TDM>,
     type?: R
   ): void {
+    const realHandler: IpcMainMessageHandler<W, C, TDM, keyof TDM> = (msg) => {
+      if (this.log) {
+        console.log(`${colors.blue('IPC Reply received')}`, msg);
+      }
+      return handler(msg);
+    };
+    this.handlersMap.set(handler, realHandler);
+
     this.ipc.on(
       {
         channel: this.channel,
         id: this.id,
         type,
       },
-      handler
+      realHandler
     );
   }
 
@@ -144,6 +181,11 @@ class IpcMainMessageClass<
       id: this.id,
       type: END_MSG_TYPE,
     };
+
+    if (this.log) {
+      console.log(`${colors.red('IPC end')}`, msg);
+    }
+
     this.target.send(this.channel, msg);
   }
 
@@ -159,6 +201,8 @@ class IpcMainMessageClass<
   }
 
   public off(handler: IpcMainMessageHandler<W, C, TDM, keyof TDM>): void {
-    this.ipc.off(this.channel, handler);
+    const realHandler = this.handlersMap.get(handler) || handler;
+    this.ipc.off(this.channel, realHandler);
+    this.handlersMap.delete(handler);
   }
 }

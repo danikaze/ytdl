@@ -1,5 +1,6 @@
 import { ipcRenderer, IpcRendererEvent } from 'electron';
 import { removeFromArray } from '../../remove-from-array';
+import type { TypedIpcOptions } from '..';
 import { END_MSG_TYPE, isValidMessage, TypeDataMapping } from '.';
 import {
   createIpcRendererIncomingMessage,
@@ -68,6 +69,12 @@ export class TypedIpcRenderer<
     IpcMessageHandlerWrapper<C, TDM>
   > = new Map();
 
+  private readonly log: boolean;
+
+  public constructor({ log }: TypedIpcOptions = {}) {
+    this.log = log || false;
+  }
+
   public is<T extends keyof TDM>(
     msg: IpcRendererMessage<C, TDM, keyof TDM>,
     type: T
@@ -89,7 +96,7 @@ export class TypedIpcRenderer<
     type: T,
     data: TDM[T]
   ): IpcRendererMessage<C, TDM, keyof TDM> {
-    return createIpcRendererMessage(this, channel, type, data);
+    return createIpcRendererMessage(this, channel, type, data, this.log);
   }
 
   public on<T extends keyof TDM = keyof TDM>(
@@ -154,6 +161,10 @@ export class TypedIpcRenderer<
       if (id && id !== msg.id) return;
       if (type && type !== msg.type) return;
 
+      if (this.log) {
+        console.log('%c▼%c IPC', 'color:blue;', 'color:undefined;', msg);
+      }
+
       if (once) {
         this.off(channel, handler);
       }
@@ -184,9 +195,13 @@ export class TypedIpcRenderer<
       // if the message was sent with `.end()`, then remove all handlers
       // attached to that message `id`
       if (data.type === END_MSG_TYPE) {
+        if (this.log) {
+          console.log('%c▼%c IPC end', 'color:blue;', 'color:undefined;', msg);
+        }
         const idHandlers = this.getIdHandlers(data.id);
         for (let i = 0; i < idHandlers.length; i++) {
           this.off(channel, idHandlers[i]);
+          idHandlers[i](msg);
         }
         this.idHandlers.delete(data.id);
         return;

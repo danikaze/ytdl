@@ -23,9 +23,17 @@ export function createIpcRendererMessage<
   ipc: TypedIpcRenderer<C, TDM>,
   channel: C,
   type: T,
-  data?: TDM[T]
+  data?: TDM[T],
+  log?: boolean
 ): IpcRendererMessage<C, TDM, T> {
-  return new IpcRendererMessageClass<C, TDM, T>(ipc, channel, type, data);
+  return new IpcRendererMessageClass<C, TDM, T>(
+    ipc,
+    channel,
+    type,
+    data,
+    undefined,
+    log
+  );
 }
 
 export function createIpcRendererIncomingMessage<
@@ -37,9 +45,17 @@ export function createIpcRendererIncomingMessage<
   ipc: TypedIpcRenderer<C, TDM>,
   channel: C,
   type: T,
-  data?: TDM[T]
+  data?: TDM[T],
+  log?: boolean
 ): IpcRendererIncomingMessage<C, TDM, T> {
-  return new IpcRendererMessageClass<C, TDM, T>(ipc, channel, type, data, id);
+  return new IpcRendererMessageClass<C, TDM, T>(
+    ipc,
+    channel,
+    type,
+    data,
+    id,
+    log
+  );
 }
 
 /**
@@ -61,20 +77,30 @@ class IpcRendererMessageClass<
 
   public type: T;
 
-  private ipc: TypedIpcRenderer<C, TDM>;
+  private readonly handlersMap: Map<
+    | IpcRendererMessageHandler<C, never, never>
+    | IpcRendererMessageHandler<C, TDM, keyof TDM>,
+    IpcRendererMessageHandler<C, TDM, keyof TDM>
+  > = new Map();
+
+  private readonly ipc: TypedIpcRenderer<C, TDM>;
+
+  private readonly log: boolean;
 
   constructor(
     ipc: TypedIpcRenderer<C, TDM>,
     channel: C,
     type: T,
     data?: TDM[T],
-    id?: string
+    id?: string,
+    log?: boolean
   ) {
     this.ipc = ipc;
     this.channel = channel;
     this.id = id || IpcRendererMessageClass.generateMsgId();
     this.type = type;
     this.data = data!;
+    this.log = log || false;
   }
 
   private static generateMsgId(): string {
@@ -89,6 +115,11 @@ class IpcRendererMessageClass<
       type: this.type,
       data: this.data,
     };
+
+    if (this.log) {
+      console.log('%c▲%c IPC', 'color:red;', 'color:undefined;', msg);
+    }
+
     ipcRenderer.send(this.channel, msg);
   }
 
@@ -98,6 +129,11 @@ class IpcRendererMessageClass<
       type,
       data,
     };
+
+    if (this.log) {
+      console.log('%c▲%c IPC reply', 'color:red;', 'color:undefined;', msg);
+    }
+
     ipcRenderer.send(this.channel, msg);
   }
 
@@ -120,6 +156,11 @@ class IpcRendererMessageClass<
       id: this.id,
       data: END_MSG_TYPE,
     };
+
+    if (this.log) {
+      console.log('%c▲%c IPC end', 'color:red;', 'color:undefined;', msg);
+    }
+
     ipcRenderer.send(this.channel, msg);
   }
 
@@ -135,6 +176,8 @@ class IpcRendererMessageClass<
   }
 
   public off(handler: IpcRendererMessageHandler<C, TDM, keyof TDM>): void {
-    this.ipc.off(this.channel, handler);
+    const realHandler = this.handlersMap.get(handler) || handler;
+    this.ipc.off(this.channel, realHandler);
+    this.handlersMap.delete(handler);
   }
 }

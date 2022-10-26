@@ -9,8 +9,6 @@ interface Options {
 
 export function setupRendererIpc({ setScreen, setSettings }: Options) {
   typedIpcRenderer.on({ channel: 'ytdl' }, async (msg) => {
-    console.log('Ipc', msg);
-
     if (typedIpcRenderer.is(msg, 'changeScreen')) {
       setScreen('settings');
     }

@@ -21,7 +21,7 @@ export const YoutubeInput: FC<Props> = ({ onInput }) => {
     <Pane display="flex" alignItems="flex-end">
       <TextInputField
         label="Youtube URL"
-        defaultValue="https://www.youtube.com/watch?v=zyhbEFhLSiw"
+        defaultValue="https://www.youtube.com/watch?v=B74xQqhu-pI"
         marginBottom={0}
         flexGrow={1}
         marginRight={8}

@@ -89,12 +89,12 @@ export function youtubeDownload({
             if (err) {
               throw new Error(err.message);
             }
-            onComplete?.(code);
+            onComplete?.(code, finalOutputPath);
           });
           return;
         }
 
-        onComplete?.(code);
+        onComplete?.(code, downloadDestination);
       } catch (e) {
         console.log('error =>', e);
         onError?.(String(e));

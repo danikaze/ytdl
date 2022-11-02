@@ -94,7 +94,7 @@ export function useDownloadOptions() {
           metadata,
           isValidFilename: isValidFilename(finalFilename),
           downloadOptions: {
-            ...modal.downloadOptions,
+            ...currentModal.downloadOptions,
             outputFile: finalFilename,
           },
         };

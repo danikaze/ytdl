@@ -32,7 +32,10 @@ export interface IpcMessagesData {
   fetchMetadataResult: YoutubeDlMetadata;
   ytdlUpdate: YoutubeDlUpdate;
   ytdlError: string;
-  ytdlComplete: number | null;
+  ytdlComplete: {
+    exitCode: number | null;
+    downloadPath: string;
+  };
   pickPath: OpenDialogOptions;
   pickPathResult: string[] | undefined;
   initSettings: Settings;

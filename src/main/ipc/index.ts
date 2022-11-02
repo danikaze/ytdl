@@ -1,5 +1,6 @@
 import { BrowserWindow, dialog } from 'electron';
 import type { Settings } from '../../interfaces/settings';
+import { DownloadState } from '../../interfaces/download';
 import type {
   YoutubeDlAudioOptions,
   YoutubeDlVideoOptions,
@@ -8,6 +9,7 @@ import { downloadAudio } from '../../utils/youtube/download-audio';
 import { downloadVideo } from '../../utils/youtube/download-video';
 import { fetchMetadata } from '../../utils/youtube/fetch-metadata';
 import { typedIpcMain } from '../../utils/ipc';
+import { processAudio } from '../../utils/audio';
 import { mainSettings } from '../settings';
 
 export const IPC_CHANNEL = 'ytdl';
@@ -26,8 +28,19 @@ export function setupMainIpc(mainWindow: BrowserWindow) {
         outputFolder: msg.data.outputFolder,
         outputFile: msg.data.outputFile,
         format: msg.data.format,
-        onComplete: (exitCode) => {
-          msg.reply('ytdlComplete', exitCode);
+        onComplete: async (exitCode, downloadPath) => {
+          if (msg.data.format === 'mp3' && msg.data.postProcess?.audio) {
+            msg.reply('ytdlUpdate', { state: DownloadState.PROCESSING });
+            try {
+              await processAudio(downloadPath, msg.data.postProcess.audio);
+            } catch (error) {
+              msg.reply(
+                'ytdlError',
+                `Error while processing audio ${(error as Error).toString()}`
+              );
+            }
+          }
+          msg.reply('ytdlComplete', { exitCode, downloadPath });
           msg.end();
         },
         onUpdate: (update) => msg.reply('ytdlUpdate', update),
@@ -41,8 +54,8 @@ export function setupMainIpc(mainWindow: BrowserWindow) {
         outputFolder: msg.data.outputFolder,
         outputFile: msg.data.outputFile,
         format: msg.data.format,
-        onComplete: (exitCode) => {
-          msg.reply('ytdlComplete', exitCode);
+        onComplete: (exitCode, downloadPath) => {
+          msg.reply('ytdlComplete', { exitCode, downloadPath });
           msg.end();
         },
         onUpdate: (update) => msg.reply('ytdlUpdate', update),

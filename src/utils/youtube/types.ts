@@ -53,7 +53,7 @@ export interface YoutubeDlOptions {
   outputFile: string;
   onUpdate?: (progress: YoutubeDlUpdate) => void;
   onError?: (data: string) => void;
-  onComplete?: (code: number | null) => void;
+  onComplete?: (code: number | null, outputPath: string) => void;
 }
 
 export type YoutubeDlUpdate = YoutubeDlStateUpdate | YoutubeDlProgress;

@@ -40,7 +40,10 @@ const exposedYtdl = {
       }
 
       if (typedIpcRenderer.is(response, 'ytdlComplete')) {
-        options.onComplete?.(response.data);
+        options.onComplete?.(
+          response.data.exitCode,
+          response.data.downloadPath
+        );
       }
     });
 
@@ -67,7 +70,10 @@ const exposedYtdl = {
       }
 
       if (typedIpcRenderer.is(response, 'ytdlComplete')) {
-        options.onComplete?.(response.data);
+        options.onComplete?.(
+          response.data.exitCode,
+          response.data.downloadPath
+        );
       }
     });
 

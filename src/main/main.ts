@@ -8,11 +8,13 @@
  * When running `npm run build` or `npm run build:main`, this file is compiled to
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
-import path from 'path';
-import { app, BrowserWindow, shell } from 'electron';
+import path, { join } from 'path';
+import { app, BrowserWindow, protocol, shell } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
+import { fileURLToPath } from 'url';
 import MenuBuilder from './menu';
+import { THUMB_TEMP_PATH } from '../utils/constants';
 import { typedIpcMain } from '../utils/ipc';
 import { resolveHtmlPath } from './utils/resolve-html-path';
 import { setupMainIpc } from './ipc';
@@ -137,6 +139,14 @@ app.on('window-all-closed', () => {
 app
   .whenReady()
   .then(() => {
+    protocol.registerFileProtocol('thumb', (request, callback) => {
+      const filePath = fileURLToPath(
+        `file://${join(THUMB_TEMP_PATH, request.url.slice('thumb://'.length))}`
+      );
+      // eslint-disable-next-line promise/no-callback-in-promise
+      callback(filePath);
+    });
+
     createWindow();
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the

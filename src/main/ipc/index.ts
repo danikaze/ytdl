@@ -1,3 +1,4 @@
+import { basename } from 'path';
 import { BrowserWindow, dialog } from 'electron';
 import type { Settings } from '../../interfaces/settings';
 import { DownloadState } from '../../interfaces/download';
@@ -10,6 +11,7 @@ import { downloadVideo } from '../../utils/youtube/download-video';
 import { fetchMetadata } from '../../utils/youtube/fetch-metadata';
 import { typedIpcMain } from '../../utils/ipc';
 import { processAudio } from '../../utils/audio';
+import { prepareImage } from '../utils/image';
 import { mainSettings } from '../settings';
 
 export const IPC_CHANNEL = 'ytdl';
@@ -77,6 +79,7 @@ export function setupMainIpc(mainWindow: BrowserWindow) {
       const window = typedIpcMain.getWindow(msg.target);
       const pickResult = await dialog.showOpenDialog(window, msg.data);
       msg.reply('pickPathResult', pickResult.filePaths);
+      msg.end();
     }
 
     if (typedIpcMain.is(msg, 'updateSettings')) {
@@ -84,6 +87,24 @@ export function setupMainIpc(mainWindow: BrowserWindow) {
         mainSettings.set(key as keyof Settings, value);
       });
       mainSettings.save();
+    }
+
+    if (typedIpcMain.is(msg, 'prepareImage')) {
+      try {
+        const imagePath = await prepareImage(msg.data.from, msg.data.path, {
+          ...mainSettings.get('downloads.audio.metadata.image')!,
+          filename: msg.data.videoId,
+        });
+        msg.reply('prepareImageResult', {
+          path: imagePath,
+          url: `thumb://${basename(imagePath)}?t=${Date.now()}`,
+        });
+      } catch (error) {
+        msg.reply('prepareImageResult', {
+          error: (error as Error).toString(),
+        });
+      }
+      msg.end();
     }
   });
 }

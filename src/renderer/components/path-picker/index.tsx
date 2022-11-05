@@ -13,6 +13,7 @@ export interface Props {
   dialogOptions: OpenDialogOptions;
   defaultValue?: string;
   onChange?: (path: readonly string[] | undefined) => void;
+  fullWidth?: boolean;
   className?: string;
 }
 
@@ -20,9 +21,14 @@ export const PathPicker = forwardRef<HTMLInputElement, Props>(
   function PathPicker(props, ref) {
     const { showPickDialog, currentPath } = usePathPicker(props);
     const { className, placeholder, disabled } = props;
+    const classes = clsx(
+      styles.root,
+      props.fullWidth && styles.fullWidth,
+      className
+    );
 
     return (
-      <div className={clsx(styles.root, className)}>
+      <div className={classes}>
         <TextInput
           readOnly
           placeholder={placeholder}
@@ -31,6 +37,7 @@ export const PathPicker = forwardRef<HTMLInputElement, Props>(
           borderBottomRightRadius={0}
           value={currentPath}
           ref={ref}
+          width="inherit"
         />
         <Button
           disabled={disabled}

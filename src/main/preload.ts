@@ -1,6 +1,9 @@
 import { contextBridge, OpenDialogOptions } from 'electron';
 import type { Settings } from '@interfaces/settings';
-import { DownloadPostProcessOptions } from '@interfaces/download';
+import {
+  DownloadPostProcessOptions,
+  ImageToPrepareResult,
+} from '@interfaces/download';
 import { setupRendererIpc } from '@renderer/ipc';
 import { typedIpcRenderer } from '../utils/ipc';
 import {
@@ -121,6 +124,26 @@ const exposedYtdl = {
       [key]: value,
     });
     msg.send();
+  },
+
+  prepareImage: (
+    from: 'file' | 'url',
+    path: string,
+    videoId: YoutubeDlMetadata['id']
+  ): Promise<ImageToPrepareResult> => {
+    return new Promise<ImageToPrepareResult>((resolve) => {
+      const msg = typedIpcRenderer.createMessage('ytdl', 'prepareImage', {
+        from,
+        path,
+        videoId,
+      });
+      msg.onReply((reply) => {
+        if (typedIpcRenderer.is(reply, 'prepareImageResult')) {
+          resolve(reply.data);
+        }
+      });
+      msg.send();
+    });
   },
 };
 

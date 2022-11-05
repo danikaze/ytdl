@@ -6,7 +6,11 @@ import type {
   YoutubeDlVideoFormat,
 } from '@utils/youtube/types';
 import type { AppScreen } from '@interfaces/app';
-import { DownloadPostProcessOptions } from '@interfaces/download';
+import {
+  DownloadPostProcessOptions,
+  ImageToPrepare,
+  ImageToPrepareResult,
+} from '@interfaces/download';
 import { Settings } from '@interfaces/settings';
 
 export interface IpcMessagesData {
@@ -40,4 +44,6 @@ export interface IpcMessagesData {
   pickPathResult: string[] | undefined;
   initSettings: Settings;
   updateSettings: Partial<Settings>;
+  prepareImage: ImageToPrepare;
+  prepareImageResult: ImageToPrepareResult;
 }

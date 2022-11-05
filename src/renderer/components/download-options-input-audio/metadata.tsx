@@ -1,18 +1,8 @@
 import { RefObject } from 'react';
-import {
-  Pane,
-  Heading,
-  Text,
-  TextInput,
-  IconButton,
-  TrashIcon,
-  Select,
-} from 'evergreen-ui';
+import { Pane, Heading, Select } from 'evergreen-ui';
 import { AudioProcessOptions } from '@interfaces/download';
-import {
-  MetadataField,
-  useDownloadOptionsInputAudioMetadata,
-} from './metadata-hooks';
+import { useDownloadOptionsInputAudioMetadata } from './metadata-hooks';
+import { MetadataField, MetadataFieldData } from './metadata-field';
 
 export interface Props {
   show: boolean;
@@ -24,9 +14,13 @@ export function DownloadOptionsInputAudioMetadata(props: Props): JSX.Element {
     useDownloadOptionsInputAudioMetadata(props);
   const { show } = props;
 
-  const fieldList = selectedFields.map((field) =>
-    renderField(fields[field], onChangeHandler)
-  );
+  const fieldList = selectedFields.map((field) => (
+    <MetadataField
+      key={field}
+      field={fields[field]}
+      onChange={onChangeHandler}
+    />
+  ));
 
   return (
     <Pane display={show ? undefined : 'none'}>
@@ -36,23 +30,6 @@ export function DownloadOptionsInputAudioMetadata(props: Props): JSX.Element {
       <Pane marginTop={8}>
         {renderAddFieldButton(addField, addFieldRef, fields, selectedFields)}
       </Pane>
-    </Pane>
-  );
-}
-
-function renderField(field: MetadataField, onChange: () => void): JSX.Element {
-  const textStyle = {
-    display: 'inline-block',
-    width: 35,
-    textAlign: 'right',
-    marginRight: 8,
-  } as const;
-
-  return (
-    <Pane key={field.field} display="flex" alignItems="center" marginBottom={4}>
-      <Text {...textStyle}>{field.label}: </Text>
-      <TextInput ref={field.ref} onChange={onChange} />
-      <IconButton icon={TrashIcon} marginLeft={4} onClick={field.remove} />
     </Pane>
   );
 }
@@ -70,7 +47,7 @@ function renderAddFieldButton(
       }
       return unselectedFields;
     },
-    [] as MetadataField[]
+    [] as MetadataFieldData[]
   );
 
   if (availableFields.length === 0) return null;

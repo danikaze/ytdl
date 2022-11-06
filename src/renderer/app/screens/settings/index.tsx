@@ -12,6 +12,7 @@ import {
 import { useMemo } from 'react';
 import { AppSettings } from './app-settings';
 import { DownloadSettings } from './download-settings';
+import { MetadataSettings } from './metadata-settings';
 
 import styles from './settings.module.scss';
 
@@ -19,6 +20,7 @@ import styles from './settings.module.scss';
 const TABS = [
   { id: 'app', label: 'App', Content: AppSettings },
   { id: 'downloads', label: 'Downloads', Content: DownloadSettings },
+  { id: 'metadata', label: 'Metadata', Content: MetadataSettings },
 ] as const;
 /* eslint-enable @typescript-eslint/naming-convention */
 

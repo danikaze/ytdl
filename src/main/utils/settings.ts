@@ -36,8 +36,8 @@ export class MainSettings {
     this.values[key] = value;
   }
 
-  public get<K extends keyof Settings>(key: K): Settings[K] | undefined {
-    return this.values[key];
+  public get<K extends keyof Settings>(key: K): Settings[K] {
+    return this.values[key] || this.defaultValues[key];
   }
 
   public delete<K extends keyof Settings>(key: K): void {

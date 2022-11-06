@@ -38,14 +38,13 @@ export interface AudioProcessOptions {
 }
 
 export interface AudioProcessImageOptions {
-  resize:
-    | false
-    | {
-        type: 'contain' | 'cover';
-        crop: boolean;
-        width?: number;
-        height?: number;
-      };
+  resize: {
+    enabled: boolean;
+    type: 'contain' | 'cover';
+    crop: boolean;
+    width?: number;
+    height?: number;
+  };
   maxBytes?: number;
 }
 

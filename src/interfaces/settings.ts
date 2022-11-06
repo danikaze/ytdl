@@ -2,7 +2,6 @@ import type {
   YoutubeDlAudioFormat,
   YoutubeDlVideoFormat,
 } from '@utils/youtube/types';
-import { AudioProcessImageOptions } from './download';
 
 export const LAST_VALUE = '_LAST_';
 export type LastValue = typeof LAST_VALUE;
@@ -18,7 +17,11 @@ export type Settings = WithLastValues<
     'downloads.temporalFolder': string;
     'downloads.downloadType': DownloadType;
     'downloads.audio.audioFormat': YoutubeDlAudioFormat;
-    'downloads.audio.metadata.image': AudioProcessImageOptions;
+    'downloads.audio.metadata.image.maxBytes': number;
+    'downloads.audio.metadata.image.resize.enabled': boolean;
+    'downloads.audio.metadata.image.resize.type': 'cover' | 'contain';
+    'downloads.audio.metadata.image.resize.width': number;
+    'downloads.audio.metadata.image.resize.height': number;
     'downloads.video.videoFormat': YoutubeDlVideoFormat;
   },
   // list of settings with "last used"

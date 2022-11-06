@@ -4,10 +4,7 @@ import got from 'got';
 import mkdirp from 'mkdirp';
 import { join } from 'path';
 import { AudioProcessImageOptions } from '@interfaces/download';
-import {
-  THUMB_MAX_BYTES_DEFAULT,
-  THUMB_TEMP_PATH,
-} from '../../utils/constants';
+import { THUMB_TEMP_PATH } from '../../utils/constants';
 
 export type PrepareImageOptions = AudioProcessImageOptions & {
   /** only filename, no extension, no path */
@@ -24,7 +21,7 @@ export async function prepareImage(
     : getImageFromUrl(path));
   const process = sharp(input);
 
-  if (options.resize) {
+  if (options.resize.enabled) {
     process.resize({
       width: options.resize.width,
       height: options.resize.height,
@@ -55,7 +52,7 @@ async function saveToFile(
   maxBytes?: number
 ): Promise<string> {
   await mkdirp(THUMB_TEMP_PATH);
-  const maxSize = maxBytes === undefined ? THUMB_MAX_BYTES_DEFAULT : maxBytes;
+  const maxSize = maxBytes === undefined ? Infinity : maxBytes;
 
   // try using PNG for the thumbnail within the size limits
   // if not possible, fallback to JPG

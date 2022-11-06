@@ -1,6 +1,6 @@
 import { atom, useAtom } from 'jotai';
 
-export type SettingsPage = 'app' | 'downloads';
+export type SettingsPage = 'app' | 'downloads' | 'metadata';
 
 const rawSettingsPage = atom<SettingsPage>('app');
 

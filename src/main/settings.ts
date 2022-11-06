@@ -1,5 +1,4 @@
 import { LAST_VALUE } from '../interfaces/settings';
-import { THUMB_MAX_BYTES_DEFAULT } from '../utils/constants';
 import { MainSettings } from './utils/settings';
 
 export const mainSettings = new MainSettings({
@@ -12,15 +11,11 @@ export const mainSettings = new MainSettings({
     'downloads.temporalFolder': './temp',
     'downloads.downloadType': LAST_VALUE,
     'downloads.audio.audioFormat': LAST_VALUE,
-    'downloads.audio.metadata.image': {
-      resize: {
-        type: 'cover',
-        crop: true,
-        width: 500,
-        height: 500,
-      },
-      maxBytes: THUMB_MAX_BYTES_DEFAULT,
-    },
+    'downloads.audio.metadata.image.maxBytes': 50000,
+    'downloads.audio.metadata.image.resize.enabled': true,
+    'downloads.audio.metadata.image.resize.type': 'cover',
+    'downloads.audio.metadata.image.resize.width': 500,
+    'downloads.audio.metadata.image.resize.height': 500,
     'downloads.video.videoFormat': LAST_VALUE,
     // latest used values
     'last.downloads.downloadFolder': './downloads',

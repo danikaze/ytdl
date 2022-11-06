@@ -92,7 +92,24 @@ export function setupMainIpc(mainWindow: BrowserWindow) {
     if (typedIpcMain.is(msg, 'prepareImage')) {
       try {
         const imagePath = await prepareImage(msg.data.from, msg.data.path, {
-          ...mainSettings.get('downloads.audio.metadata.image')!,
+          maxBytes: mainSettings.get('downloads.audio.metadata.image.maxBytes'),
+          resize: {
+            enabled: mainSettings.get(
+              'downloads.audio.metadata.image.resize.enabled'
+            ),
+            type: mainSettings.get(
+              'downloads.audio.metadata.image.resize.type'
+            ),
+            crop: mainSettings.get(
+              'downloads.audio.metadata.image.resize.crop'
+            ),
+            width: mainSettings.get(
+              'downloads.audio.metadata.image.resize.width'
+            ),
+            height: mainSettings.get(
+              'downloads.audio.metadata.image.resize.height'
+            ),
+          },
           filename: msg.data.videoId,
         });
         msg.reply('prepareImageResult', {

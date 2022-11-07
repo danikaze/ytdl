@@ -29,7 +29,7 @@ module.exports = {
     'react/react-in-jsx-scope': 'off',
 
     /*
-     * Custom CSS rules :)
+     * Custom rules :)
      */
 
     // https://reactjs.org/docs/hooks-rules.html
@@ -41,6 +41,8 @@ module.exports = {
 
     // https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/no-unused-prop-types.md
     'react/no-unused-prop-types': 'off',
+
+    'no-continue': 'off',
 
     // https://eslint.org/docs/latest/rules/no-restricted-syntax
     // remove the for-of usage restriction from airbnb-base rules

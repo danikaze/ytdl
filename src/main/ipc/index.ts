@@ -100,9 +100,6 @@ export function setupMainIpc(mainWindow: BrowserWindow) {
             type: mainSettings.get(
               'downloads.audio.metadata.image.resize.type'
             ),
-            crop: mainSettings.get(
-              'downloads.audio.metadata.image.resize.crop'
-            ),
             width: mainSettings.get(
               'downloads.audio.metadata.image.resize.width'
             ),

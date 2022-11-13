@@ -41,7 +41,6 @@ export interface AudioProcessImageOptions {
   resize: {
     enabled: boolean;
     type: 'contain' | 'cover';
-    crop: boolean;
     width?: number;
     height?: number;
   };

@@ -2,12 +2,16 @@ import { useCallback } from 'react';
 import { atom, useAtom } from 'jotai';
 import { DownloadPostProcessOptions } from '@interfaces/download';
 import type { DownloadType } from '@interfaces/settings';
+import {
+  DownloadAudioOptions,
+  DownloadOptions,
+  DownloadVideoOptions,
+} from '@main/preload';
 import { isValidFilename } from '@utils/is-valid-filename';
 import { replaceMetadata } from '@utils/youtube/replace-metadata';
 import {
   YoutubeDlAudioOptions,
   YoutubeDlMetadata,
-  YoutubeDlOptions,
   YoutubeDlVideoOptions,
 } from '@utils/youtube/types';
 import { useSettings } from './settings';
@@ -21,16 +25,16 @@ interface ModalState {
   metadata?: YoutubeDlMetadata;
   downloadType: DownloadType;
   downloadOptions: Pick<
-    YoutubeDlOptions,
+    DownloadOptions,
     /** Filename after replacing the metadata */
     'outputFile' | 'outputFolder'
   >;
   downloadAudioOptions: Omit<
-    YoutubeDlAudioOptions,
+    DownloadAudioOptions,
     'outputFile' | 'outputFolder'
   >;
   downloadVideoOptions: Omit<
-    YoutubeDlVideoOptions,
+    DownloadVideoOptions,
     'outputFile' | 'outputFolder'
   >;
   postProcessOptions: DownloadPostProcessOptions;

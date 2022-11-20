@@ -1,7 +1,7 @@
 import { basename } from 'path';
 import { BrowserWindow, dialog } from 'electron';
 import type { Settings } from '../../interfaces/settings';
-import { DownloadState } from '../../interfaces/download';
+import { Download, DownloadState } from '../../interfaces/download';
 import type {
   YoutubeDlAudioOptions,
   YoutubeDlVideoOptions,
@@ -9,10 +9,13 @@ import type {
 import { downloadAudio } from '../../utils/youtube/download-audio';
 import { downloadVideo } from '../../utils/youtube/download-video';
 import { fetchMetadata } from '../../utils/youtube/fetch-metadata';
+import { IpcMessagesData } from '../../utils/ipc/msgs';
 import { typedIpcMain } from '../../utils/ipc';
 import { processAudio } from '../../utils/audio';
+import { IpcMainIncomingMessage } from '../../utils/ipc/private/main-message';
 import { prepareImage } from '../utils/image';
 import { mainSettings } from '../settings';
+import { Catalogue } from '../catalogue';
 
 export const IPC_CHANNEL = 'ytdl';
 
@@ -21,49 +24,85 @@ export type IpcMsg<T extends string, D extends {} = {}> = {
   type: T;
 } & D;
 
-export function setupMainIpc(mainWindow: BrowserWindow) {
+export function setupMainIpc(mainWindow: BrowserWindow, catalogue: Catalogue) {
   typedIpcMain.registerTarget('main', mainWindow);
 
   typedIpcMain.on({ channel: IPC_CHANNEL }, async (msg) => {
-    if (typedIpcMain.is(msg, 'downloadAudio')) {
-      const options: YoutubeDlAudioOptions = {
+    if (
+      typedIpcMain.is(msg, 'downloadAudio') ||
+      typedIpcMain.is(msg, 'downloadVideo')
+    ) {
+      const id = catalogue.addDownload({
+        url: msg.data.url,
+        postProcess: msg.data.postProcess || {},
+        format: msg.data.format,
+      });
+      const ytdlUpdate = getYtdlUpdate(catalogue, msg);
+
+      const options: YoutubeDlAudioOptions | YoutubeDlVideoOptions = {
         outputFolder: msg.data.outputFolder,
         outputFile: msg.data.outputFile,
         format: msg.data.format,
+        onStart: async ({ temporalFile }) => {
+          catalogue.updateDownload({ id, temporalFile });
+          msg.reply('ytdlStart', catalogue.getDownload(id)!);
+        },
         onComplete: async (exitCode, downloadPath) => {
-          if (msg.data.format === 'mp3' && msg.data.postProcess?.audio) {
-            msg.reply('ytdlUpdate', { state: DownloadState.PROCESSING });
-            try {
-              await processAudio(downloadPath, msg.data.postProcess.audio);
-            } catch (error) {
-              msg.reply(
-                'ytdlError',
-                `Error while processing audio ${(error as Error).toString()}`
-              );
+          if (exitCode) {
+            ytdlUpdate({
+              id,
+              state: DownloadState.ERRORED,
+              speed: null,
+              eta: null,
+            });
+            return;
+          }
+
+          if (typedIpcMain.is(msg, 'downloadAudio')) {
+            if (msg.data.format === 'mp3' && msg.data.postProcess?.audio) {
+              ytdlUpdate({ id, state: DownloadState.PROCESSING });
+              try {
+                await processAudio(downloadPath, msg.data.postProcess.audio);
+              } catch (rawError) {
+                const error = `Error while processing audio ${(
+                  rawError as Error
+                ).toString()}`;
+                ytdlUpdate({ id, error });
+              }
             }
           }
-          msg.reply('ytdlComplete', { exitCode, downloadPath });
-          msg.end();
-        },
-        onUpdate: (update) => msg.reply('ytdlUpdate', update),
-        onError: (error) => msg.reply('ytdlError', error),
-      };
-      downloadAudio(msg.data.url, options);
-    }
 
-    if (typedIpcMain.is(msg, 'downloadVideo')) {
-      const options: YoutubeDlVideoOptions = {
-        outputFolder: msg.data.outputFolder,
-        outputFile: msg.data.outputFile,
-        format: msg.data.format,
-        onComplete: (exitCode, downloadPath) => {
-          msg.reply('ytdlComplete', { exitCode, downloadPath });
+          ytdlUpdate({
+            id,
+            state: DownloadState.COMPLETED,
+            downloadPctg: 100,
+            speed: null,
+            eta: null,
+          });
           msg.end();
         },
-        onUpdate: (update) => msg.reply('ytdlUpdate', update),
-        onError: (error) => msg.reply('ytdlError', error),
+        onUpdate: (update) => {
+          ytdlUpdate({
+            id,
+            state: DownloadState.DOWNLOADING,
+            ...update,
+          });
+        },
+        onError: (error) => {
+          ytdlUpdate({
+            id,
+            error,
+            state: DownloadState.ERRORED,
+            speed: null,
+            eta: null,
+          });
+        },
       };
-      downloadVideo(msg.data.url, options);
+      if (typedIpcMain.is(msg, 'downloadAudio')) {
+        downloadAudio(msg.data.url, options as YoutubeDlAudioOptions);
+      } else {
+        downloadVideo(msg.data.url, options as YoutubeDlVideoOptions);
+      }
     }
 
     if (typedIpcMain.is(msg, 'fetchMetadata')) {
@@ -121,4 +160,21 @@ export function setupMainIpc(mainWindow: BrowserWindow) {
       msg.end();
     }
   });
+}
+
+function getYtdlUpdate(
+  catalogue: Catalogue,
+  msg: IpcMainIncomingMessage<
+    'main',
+    'ytdl',
+    IpcMessagesData,
+    'downloadAudio' | 'downloadVideo'
+  >
+) {
+  return (
+    data: Pick<Download, 'id'> & Nullable<Partial<Omit<Download, 'id'>>>
+  ) => {
+    catalogue.updateDownload(data);
+    msg.reply('ytdlUpdate', data);
+  };
 }

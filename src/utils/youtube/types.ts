@@ -9,7 +9,7 @@ export function isStateUpdate(
 export function isProgressUpdate(
   update: YoutubeDlUpdate
 ): update is YoutubeDlProgress {
-  return (update as YoutubeDlProgress).percentage !== undefined;
+  return (update as YoutubeDlProgress).downloadPctg !== undefined;
 }
 
 export type YoutubeDlAudioFormat =
@@ -51,12 +51,20 @@ export interface YoutubeDlOptions {
   args: string[];
   outputFolder: string;
   outputFile: string;
+  onStart?: (download: YoutubeDlStart) => void;
   onUpdate?: (progress: YoutubeDlUpdate) => void;
   onError?: (data: string) => void;
   onComplete?: (code: number | null, outputPath: string) => void;
 }
 
-export type YoutubeDlUpdate = YoutubeDlStateUpdate | YoutubeDlProgress;
+export interface YoutubeDlStart {
+  temporalFile: string;
+}
+
+export type YoutubeDlUpdate =
+  | YoutubeDlStateUpdate
+  | YoutubeDlProgress
+  | YoutubeDlOutputFileUpdate;
 
 export interface YoutubeDlStateUpdate {
   state: Download['state'];
@@ -64,13 +72,17 @@ export interface YoutubeDlStateUpdate {
 
 export interface YoutubeDlProgress {
   /** Percentage donwloaded as 0-100 */
-  percentage: number | undefined;
+  downloadPctg: number | undefined;
   /** Download speed as b/s */
   speed: number | undefined;
   /** Seconds remaining */
   eta: number | undefined;
   /** Size as reported (i.e. `"79.30KiB/s"`) */
   size: string | undefined;
+}
+
+export interface YoutubeDlOutputFileUpdate {
+  outputFile: string;
 }
 
 /* eslint-disable @typescript-eslint/naming-convention */

@@ -18,7 +18,7 @@ export function parseDownload(data: string): YoutubeDlProgress | undefined {
   const finished = DL_COMPLETE_RE.exec(data);
   if (finished) {
     return {
-      percentage: 100,
+      downloadPctg: 100,
       speed: undefined,
       eta: undefined,
       size: finished[1],
@@ -29,7 +29,7 @@ export function parseDownload(data: string): YoutubeDlProgress | undefined {
   if (!progress) return undefined;
 
   return {
-    percentage: parsePercentage(progress[1]),
+    downloadPctg: parsePercentage(progress[1]),
     size: progress[2],
     speed: parseSpeed(progress[3]),
     eta: parseTime(progress[4]),

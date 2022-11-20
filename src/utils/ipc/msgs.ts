@@ -2,11 +2,11 @@ import type { OpenDialogOptions } from 'electron';
 import type {
   YoutubeDlAudioFormat,
   YoutubeDlMetadata,
-  YoutubeDlUpdate,
   YoutubeDlVideoFormat,
 } from '@utils/youtube/types';
 import type { AppScreen } from '@interfaces/app';
 import {
+  Download,
   DownloadPostProcessOptions,
   ImageToPrepare,
   ImageToPrepareResult,
@@ -29,17 +29,15 @@ export interface IpcMessagesData {
     format: YoutubeDlVideoFormat;
     outputFolder: string;
     outputFile: string;
+    postProcess?: {};
   };
   fetchMetadata: {
     url: string;
   };
   fetchMetadataResult: YoutubeDlMetadata;
-  ytdlUpdate: YoutubeDlUpdate;
+  ytdlStart: Download;
+  ytdlUpdate: Pick<Download, 'id'> & Nullable<Partial<Omit<Download, 'id'>>>;
   ytdlError: string;
-  ytdlComplete: {
-    exitCode: number | null;
-    downloadPath: string;
-  };
   pickPath: OpenDialogOptions;
   pickPathResult: string[] | undefined;
   initSettings: Settings;

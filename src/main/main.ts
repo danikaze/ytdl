@@ -20,6 +20,7 @@ import { resolveHtmlPath } from './utils/resolve-html-path';
 import { setupMainIpc } from './ipc';
 import { mainSettings } from './settings';
 import { createPositionedWindow } from './utils/create-positioned-window';
+import { Catalogue } from './catalogue';
 
 class AppUpdater {
   constructor() {
@@ -69,6 +70,8 @@ const createWindow = async () => {
     return path.join(RESOURCES_PATH, ...paths);
   };
 
+  const catalogue = new Catalogue();
+  await catalogue.open();
   mainWindow = createPositionedWindow('main', {
     show: false,
     width: 1024,
@@ -80,7 +83,7 @@ const createWindow = async () => {
         : path.join(__dirname, '../../.erb/dll/preload.js'),
     },
   });
-  setupMainIpc(mainWindow);
+  setupMainIpc(mainWindow, catalogue);
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
   mainWindow.on('ready-to-show', async () => {

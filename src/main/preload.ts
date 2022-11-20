@@ -1,28 +1,42 @@
 import { contextBridge, OpenDialogOptions } from 'electron';
 import type { Settings } from '@interfaces/settings';
 import {
+  Download,
   DownloadPostProcessOptions,
   ImageToPrepareResult,
 } from '@interfaces/download';
 import { setupRendererIpc } from '@renderer/ipc';
 import { typedIpcRenderer } from '../utils/ipc';
 import {
-  YoutubeDlAudioOptions,
+  YoutubeDlAudioFormat,
   YoutubeDlMetadata,
-  YoutubeDlVideoOptions,
+  YoutubeDlVideoFormat,
 } from '../utils/youtube/types';
 
 export type ElectronYtdl = typeof exposedYtdl;
 
+export type DownloadOptions = {
+  outputFolder: string;
+  outputFile: string;
+  onStart?: (download: Download) => void;
+  onUpdate?: (
+    download: Pick<Download, 'id'> & Nullable<Partial<Omit<Download, 'id'>>>
+  ) => void;
+};
+
+export type DownloadAudioOptions = DownloadOptions & {
+  format?: YoutubeDlAudioFormat;
+  postProcess?: DownloadPostProcessOptions;
+};
+
+export type DownloadVideoOptions = DownloadOptions & {
+  format?: YoutubeDlVideoFormat;
+};
+
 const exposedYtdl = {
   setupIpc: setupRendererIpc,
 
-  downloadAudio: (
-    url: string,
-    options: YoutubeDlAudioOptions & {
-      postProcess?: DownloadPostProcessOptions;
-    }
-  ) => {
+  downloadAudio: (url: string, options: DownloadAudioOptions) => {
     const msg = typedIpcRenderer.createMessage('ytdl', 'downloadAudio', {
       url,
       outputFolder: options.outputFolder,
@@ -32,51 +46,38 @@ const exposedYtdl = {
     });
 
     msg.onReply((response) => {
+      if (typedIpcRenderer.is(response, 'ytdlStart')) {
+        options.onStart?.(response.data);
+        return;
+      }
+
       if (typedIpcRenderer.is(response, 'ytdlUpdate')) {
         options.onUpdate?.(response.data);
-        return;
-      }
-
-      if (typedIpcRenderer.is(response, 'ytdlError')) {
-        options.onError?.(response.data);
-        return;
-      }
-
-      if (typedIpcRenderer.is(response, 'ytdlComplete')) {
-        options.onComplete?.(
-          response.data.exitCode,
-          response.data.downloadPath
-        );
+        // return;
       }
     });
 
     msg.send();
   },
 
-  downloadVideo: (url: string, options: YoutubeDlVideoOptions) => {
+  downloadVideo: (url: string, options: DownloadVideoOptions) => {
     const msg = typedIpcRenderer.createMessage('ytdl', 'downloadVideo', {
       url,
       outputFolder: options.outputFolder,
       outputFile: options.outputFile,
       format: options.format || 'best',
+      postProcess: {},
     });
 
     msg.onReply((response) => {
+      if (typedIpcRenderer.is(response, 'ytdlStart')) {
+        options.onStart?.(response.data);
+        return;
+      }
+
       if (typedIpcRenderer.is(response, 'ytdlUpdate')) {
         options.onUpdate?.(response.data);
-        return;
-      }
-
-      if (typedIpcRenderer.is(response, 'ytdlError')) {
-        options.onError?.(response.data);
-        return;
-      }
-
-      if (typedIpcRenderer.is(response, 'ytdlComplete')) {
-        options.onComplete?.(
-          response.data.exitCode,
-          response.data.downloadPath
-        );
+        // return;
       }
     });
 

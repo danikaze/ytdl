@@ -15,6 +15,7 @@ export function downloadAudio(url: string, options: YoutubeDlAudioOptions) {
     args,
     outputFolder: options.outputFolder,
     outputFile: options.outputFile,
+    onStart: options.onStart,
     onComplete: options.onComplete,
     onError: options.onError,
     onUpdate: options.onUpdate,

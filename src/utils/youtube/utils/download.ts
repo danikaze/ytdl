@@ -15,6 +15,7 @@ export function youtubeDownload({
   args,
   outputFolder,
   outputFile,
+  onStart,
   onUpdate,
   onError,
   onComplete,
@@ -31,13 +32,18 @@ export function youtubeDownload({
     const temporalFolder =
       mainSettings.get('downloads.useTemporalFolder') &&
       mainSettings.get('downloads.temporalFolder');
-    const outputArg = join(
+    const temporalFile = join(
       temporalFolder || outputFolder,
       `${outputFile}.%(ext)s`
     );
     let downloadDestination: string;
+    let reportedDestination: string;
 
-    const exeArgs = ['-o', outputArg, ...args];
+    onStart?.({
+      temporalFile,
+    });
+
+    const exeArgs = ['-o', temporalFile, ...args];
     const child = spawn(exePath, exeArgs);
 
     child.stdout.on('data', (dataBuffer) => {
@@ -48,6 +54,11 @@ export function youtubeDownload({
         downloadDestination = destination;
       }
       if (!onUpdate) return;
+
+      if (downloadDestination !== reportedDestination) {
+        reportedDestination = downloadDestination;
+        onUpdate({ outputFile: reportedDestination });
+      }
 
       const webDl = parseDownloadWebsite(data);
       if (webDl) {

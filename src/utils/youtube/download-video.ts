@@ -8,6 +8,7 @@ export function downloadVideo(url: string, options: YoutubeDlVideoOptions) {
     args,
     outputFolder: options.outputFolder,
     outputFile: options.outputFile,
+    onStart: options.onStart,
     onComplete: options.onComplete,
     onError: options.onError,
     onUpdate: options.onUpdate,

@@ -1,4 +1,8 @@
-import { YoutubeDlMetadata } from '@utils/youtube/types';
+import {
+  YoutubeDlAudioFormat,
+  YoutubeDlMetadata,
+  YoutubeDlVideoFormat,
+} from '@utils/youtube/types';
 import type { Tags } from 'node-id3';
 
 export const enum DownloadState {
@@ -14,10 +18,12 @@ export const enum DownloadState {
 
 export interface Download {
   id: string;
+  format: YoutubeDlAudioFormat | YoutubeDlVideoFormat;
   state: DownloadState;
   url: string;
   downloadPctg: number;
   temporalFile: string;
+  outputFile: string;
   size?: string;
   speed?: number;
   eta?: number;

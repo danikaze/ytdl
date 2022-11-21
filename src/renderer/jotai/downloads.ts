@@ -12,6 +12,10 @@ const rawDownloads = atom<Download[]>([]);
 export function useDownloads() {
   const [downloads, setDownloads] = useAtom(rawDownloads);
 
+  function initDownloads(downloadList: readonly Download[]) {
+    setDownloads([...downloadList]);
+  }
+
   function addDownload(download: Download) {
     setDownloads((dls) => [...dls, download]);
   }
@@ -60,6 +64,7 @@ export function useDownloads() {
   }
 
   return {
+    initDownloads,
     downloadList: downloads as Readonly<Download[]>,
     downloadAudio: addAudioDownload,
     downloadVideo: addVideoDownload,

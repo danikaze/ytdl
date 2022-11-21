@@ -40,7 +40,10 @@ export interface IpcMessagesData {
   ytdlError: string;
   pickPath: OpenDialogOptions;
   pickPathResult: string[] | undefined;
-  initSettings: Settings;
+  initApp: {
+    settings: Settings;
+    downloads: Download[];
+  };
   updateSettings: Partial<Settings>;
   prepareImage: ImageToPrepare;
   prepareImageResult: ImageToPrepareResult;

@@ -60,6 +60,10 @@ export class CatalogueDb {
     this.db.update({ version: CatalogueDb.VERSION });
   }
 
+  public getAllDownloads(): DeepReadonly<Download[]> {
+    return Object.values(this.db.data.downloads);
+  }
+
   public getDownload(id: Download['id']): Download | undefined {
     return this.db.data.downloads[id];
   }

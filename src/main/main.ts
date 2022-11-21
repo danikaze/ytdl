@@ -99,14 +99,13 @@ const createWindow = async () => {
 
   mainWindow.webContents.on('did-finish-load', async () => {
     const settings = await mainSettings.load();
-    const initSettings = typedIpcMain.createMessage(
-      'main',
-      'ytdl',
-      'initSettings',
-      settings
-    );
-    initSettings.send();
-    initSettings.end();
+    const downloads = catalogue.getAllDownloads();
+    const initApp = typedIpcMain.createMessage('main', 'ytdl', 'initApp', {
+      settings,
+      downloads,
+    });
+    initApp.send();
+    initApp.end();
   });
 
   mainWindow.on('closed', () => {

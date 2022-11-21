@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { lightTheme } from '@renderer/themes/light';
 import { setThemeGlobals } from '@renderer/themes';
 import { useAppScreen } from '@renderer/jotai/app-screen';
+import { useDownloads } from '@renderer/jotai/downloads';
 import { useSettings } from '@renderer/jotai/settings';
 
 import { DownloadScreen } from './screens/download';
@@ -14,11 +15,12 @@ import './app.module.scss';
 export function App(): JSX.Element {
   const { screen, setScreen } = useAppScreen();
   const { setSettings } = useSettings();
+  const { initDownloads } = useDownloads();
   const theme = lightTheme;
 
   useEffect(() => {
-    window.ytdl.setupIpc({ setScreen, setSettings });
-  }, [setScreen, setSettings]);
+    window.ytdl.setupIpc({ setScreen, setSettings, initDownloads });
+  }, [setScreen, setSettings, initDownloads]);
 
   useEffect(() => {
     setThemeGlobals(theme);

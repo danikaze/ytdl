@@ -34,6 +34,10 @@ export class Catalogue {
     await this.upgrade();
   }
 
+  public getAllDownloads(): DeepReadonly<Download[]> {
+    return this.db.getAllDownloads();
+  }
+
   public getDownload(id: Download['id']): Download | undefined {
     return this.db.getDownload(id);
   }

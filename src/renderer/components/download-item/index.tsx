@@ -1,5 +1,6 @@
 import { Download, DownloadState } from '@interfaces/download';
 import { useYtdlTheme } from '@renderer/themes';
+import { useContextMenu } from '@renderer/utils/open-context-menu';
 import { formatSpeed, formatTime } from '@utils/format';
 import { StatusIndicator, Table, Tooltip } from 'evergreen-ui';
 import { TABLE_COLS } from '../download-list/constants';
@@ -12,6 +13,7 @@ export type Props = {
 } & Download;
 
 export function DownloadItem({
+  id,
   index,
   state,
   url,
@@ -21,11 +23,12 @@ export function DownloadItem({
   eta,
   error,
 }: Props): JSX.Element {
+  const openContextMenu = useContextMenu({ type: 'downloadItem', id }, [id]);
   const formattedSpeed = formatSpeed(speed);
   const formattedEta = formatTime(eta);
 
   return (
-    <Table.Row height={32}>
+    <Table.Row height={32} onContextMenu={openContextMenu}>
       <Table.TextCell {...TABLE_COLS.index}>{index + 1}</Table.TextCell>
       <Table.TextCell {...TABLE_COLS.url}>
         {renderStatusIcon(state, error)}

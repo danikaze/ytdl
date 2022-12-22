@@ -17,6 +17,10 @@ export interface IpcMessagesData {
   changeScreen: {
     screen: AppScreen;
   };
+  openContextMenu: {
+    x: number;
+    y: number;
+  };
   downloadAudio: {
     url: string;
     format: YoutubeDlAudioFormat;

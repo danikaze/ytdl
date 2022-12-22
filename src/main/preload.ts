@@ -7,6 +7,7 @@ import {
 } from '@interfaces/download';
 import { setupRendererIpc } from '@renderer/ipc';
 import { typedIpcRenderer } from '../utils/ipc';
+import type { IpcMessagesData } from '../utils/ipc/msgs';
 import {
   YoutubeDlAudioFormat,
   YoutubeDlMetadata,
@@ -35,6 +36,16 @@ export type DownloadVideoOptions = DownloadOptions & {
 
 const exposedYtdl = {
   setupIpc: setupRendererIpc,
+
+  openContextMenu: (props: IpcMessagesData['openContextMenu']) => {
+    const msg = typedIpcRenderer.createMessage(
+      'ytdl',
+      'openContextMenu',
+      props
+    );
+    msg.send();
+    msg.end();
+  },
 
   downloadAudio: (url: string, options: DownloadAudioOptions) => {
     const msg = typedIpcRenderer.createMessage('ytdl', 'downloadAudio', {

@@ -16,6 +16,7 @@ import { IpcMainIncomingMessage } from '../../utils/ipc/private/main-message';
 import { prepareImage } from '../utils/image';
 import { mainSettings } from '../settings';
 import { Catalogue } from '../catalogue';
+import { openContextMenu } from '../context-menu';
 
 export const IPC_CHANNEL = 'ytdl';
 
@@ -28,6 +29,18 @@ export function setupMainIpc(mainWindow: BrowserWindow, catalogue: Catalogue) {
   typedIpcMain.registerTarget('main', mainWindow);
 
   typedIpcMain.on({ channel: IPC_CHANNEL }, async (msg) => {
+    if (typedIpcMain.is(msg, 'openContextMenu')) {
+      const { x, y, ...data } = msg.data;
+      openContextMenu(
+        {
+          window: mainWindow,
+          x,
+          y,
+        },
+        data
+      );
+    }
+
     if (
       typedIpcMain.is(msg, 'downloadAudio') ||
       typedIpcMain.is(msg, 'downloadVideo')

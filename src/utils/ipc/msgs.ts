@@ -51,4 +51,6 @@ export interface IpcMessagesData {
   updateSettings: Partial<Settings>;
   prepareImage: ImageToPrepare;
   prepareImageResult: ImageToPrepareResult;
+  confirmDownloadRemoval: Pick<Download, 'id'>;
+  removeDownload: Pick<Download, 'id'>;
 }

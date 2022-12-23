@@ -172,6 +172,10 @@ export function setupMainIpc(mainWindow: BrowserWindow, catalogue: Catalogue) {
       }
       msg.end();
     }
+
+    if (typedIpcMain.is(msg, 'removeDownload')) {
+      catalogue.removeDownload(msg.data.id);
+    }
   });
 }
 

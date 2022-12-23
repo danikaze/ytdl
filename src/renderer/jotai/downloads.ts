@@ -6,6 +6,7 @@ import {
   DownloadOptions,
   DownloadVideoOptions,
 } from '@main/preload';
+import { removeFromArrayAndCopy } from '@utils/remove-from-array';
 
 const rawDownloads = atom<Download[]>([]);
 
@@ -21,7 +22,7 @@ export function useDownloads() {
   }
 
   function updateDownload(
-    id: string,
+    id: Download['id'],
     value: Partial<DeepNullable<Omit<Download, 'id'>>>
   ) {
     setDownloads((dls) => {
@@ -30,6 +31,11 @@ export function useDownloads() {
       assignDeepWithDelete(item, value);
       return [...dls];
     });
+  }
+
+  function removeDownload(id: Download['id']): void {
+    setDownloads(removeFromArrayAndCopy(downloads, (d) => d.id === id));
+    window.ytdl.removeDownload(id);
   }
 
   function getDownloadCallbacks(): Pick<
@@ -65,6 +71,7 @@ export function useDownloads() {
 
   return {
     initDownloads,
+    removeDownload,
     downloadList: downloads as Readonly<Download[]>,
     downloadAudio: addAudioDownload,
     downloadVideo: addVideoDownload,

@@ -157,6 +157,13 @@ const exposedYtdl = {
       msg.send();
     });
   },
+
+  removeDownload: (id: Download['id']): void => {
+    const msg = typedIpcRenderer.createMessage('ytdl', 'removeDownload', {
+      id,
+    });
+    msg.send();
+  },
 };
 
 contextBridge.exposeInMainWorld('ytdl', exposedYtdl);

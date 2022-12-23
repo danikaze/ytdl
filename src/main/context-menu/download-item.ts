@@ -1,4 +1,5 @@
-import type { Download } from '@interfaces/download';
+import type { Download } from '../../interfaces/download';
+import { typedIpcMain } from '../../utils/ipc';
 import type { ContextMenuTemplate } from '.';
 
 export interface DownloadItemContextMenuData {
@@ -19,7 +20,16 @@ export function createDownloadItemContextMenu(
     {
       label: 'Remove',
       click: () => {
-        console.log('Removing download ', data.id);
+        const msg = typedIpcMain.createMessage(
+          'main',
+          'ytdl',
+          'confirmDownloadRemoval',
+          {
+            id: data.id,
+          }
+        );
+        msg.send();
+        msg.end();
       },
     },
   ];

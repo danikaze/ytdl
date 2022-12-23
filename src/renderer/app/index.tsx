@@ -6,6 +6,7 @@ import { useAppScreen } from '@renderer/jotai/app-screen';
 import { useDownloads } from '@renderer/jotai/downloads';
 import { useSettings } from '@renderer/jotai/settings';
 import { getContextMenuOpener } from '@renderer/utils/open-context-menu';
+import { useAppUi } from '@renderer/jotai/ui';
 
 import { DownloadScreen } from './screens/download';
 import { SettingsScreen } from './screens/settings';
@@ -15,6 +16,7 @@ import './app.module.scss';
 
 export function App(): JSX.Element {
   const { screen, setScreen } = useAppScreen();
+  const ui = useAppUi();
   const { setSettings } = useSettings();
   const { initDownloads } = useDownloads();
   const theme = lightTheme;
@@ -26,8 +28,8 @@ export function App(): JSX.Element {
   }, []);
 
   useEffect(() => {
-    window.ytdl.setupIpc({ setScreen, setSettings, initDownloads });
-  }, [setScreen, setSettings, initDownloads]);
+    window.ytdl.setupIpc({ setScreen, setSettings, initDownloads, ui });
+  }, [setScreen, setSettings, initDownloads, ui]);
 
   useEffect(() => {
     setThemeGlobals(theme);

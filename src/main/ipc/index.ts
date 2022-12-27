@@ -4,6 +4,7 @@ import type { Settings } from '../../interfaces/settings';
 import { Download, DownloadState } from '../../interfaces/download';
 import type {
   YoutubeDlAudioOptions,
+  YoutubeDlReturn,
   YoutubeDlVideoOptions,
 } from '../../utils/youtube/types';
 import { downloadAudio } from '../../utils/youtube/download-audio';
@@ -24,6 +25,8 @@ export type IpcMsg<T extends string, D extends {} = {}> = {
   id: number;
   type: T;
 } & D;
+
+const youtubeDownloads = new Map<Download['id'], YoutubeDlReturn>();
 
 export function setupMainIpc(mainWindow: BrowserWindow, catalogue: Catalogue) {
   typedIpcMain.registerTarget('main', mainWindow);
@@ -61,6 +64,7 @@ export function setupMainIpc(mainWindow: BrowserWindow, catalogue: Catalogue) {
           msg.reply('ytdlStart', catalogue.getDownload(id)!);
         },
         onComplete: async (exitCode, downloadPath) => {
+          youtubeDownloads.delete(id);
           if (exitCode) {
             ytdlUpdate({
               id,
@@ -111,10 +115,12 @@ export function setupMainIpc(mainWindow: BrowserWindow, catalogue: Catalogue) {
           });
         },
       };
-      if (typedIpcMain.is(msg, 'downloadAudio')) {
-        downloadAudio(msg.data.url, options as YoutubeDlAudioOptions);
-      } else {
-        downloadVideo(msg.data.url, options as YoutubeDlVideoOptions);
+
+      const dl = typedIpcMain.is(msg, 'downloadAudio')
+        ? downloadAudio(msg.data.url, options as YoutubeDlAudioOptions)
+        : downloadVideo(msg.data.url, options as YoutubeDlVideoOptions);
+      if (dl) {
+        youtubeDownloads.set(id, dl);
       }
     }
 
@@ -174,7 +180,14 @@ export function setupMainIpc(mainWindow: BrowserWindow, catalogue: Catalogue) {
     }
 
     if (typedIpcMain.is(msg, 'removeDownload')) {
-      catalogue.removeDownload(msg.data.id, msg.data.removeData);
+      const { id, removeData } = msg.data;
+      catalogue.removeDownload(id, removeData);
+      const dl = youtubeDownloads.get(id);
+      if (dl) {
+        dl.stop();
+        youtubeDownloads.delete(id);
+      }
+      console.log('youtubeDownloads', youtubeDownloads);
     }
   });
 }

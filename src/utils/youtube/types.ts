@@ -57,6 +57,10 @@ export interface YoutubeDlOptions {
   onComplete?: (code: number | null, outputPath: string) => void;
 }
 
+export interface YoutubeDlReturn {
+  stop: () => void;
+}
+
 export interface YoutubeDlStart {
   temporalFile: string;
 }

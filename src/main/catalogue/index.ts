@@ -54,8 +54,11 @@ export class Catalogue {
     this.db.updateDownload(download);
   }
 
-  public removeDownload(id: Download['id']): void {
-    this.db.removeDownload(id);
+  public async removeDownload(
+    id: Download['id'],
+    removeData: boolean
+  ): Promise<void> {
+    await this.db.removeDownload(id, removeData);
   }
 
   private async createLibrary(): Promise<void> {

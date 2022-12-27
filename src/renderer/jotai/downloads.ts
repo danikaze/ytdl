@@ -33,9 +33,9 @@ export function useDownloads() {
     });
   }
 
-  function removeDownload(id: Download['id']): void {
+  function removeDownload(id: Download['id'], removeData: boolean): void {
     setDownloads(removeFromArrayAndCopy(downloads, (d) => d.id === id));
-    window.ytdl.removeDownload(id);
+    window.ytdl.removeDownload(id, removeData);
   }
 
   function getDownloadCallbacks(): Pick<

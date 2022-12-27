@@ -1,10 +1,13 @@
-import { YoutubeDlVideoOptions } from './types';
 import { youtubeDownload } from './utils/download';
+import { YoutubeDlReturn, YoutubeDlVideoOptions } from './types';
 
-export function downloadVideo(url: string, options: YoutubeDlVideoOptions) {
+export function downloadVideo(
+  url: string,
+  options: YoutubeDlVideoOptions
+): YoutubeDlReturn | undefined {
   const args = ['-f', options.format || 'best', url];
 
-  youtubeDownload({
+  return youtubeDownload({
     args,
     outputFolder: options.outputFolder,
     outputFile: options.outputFile,

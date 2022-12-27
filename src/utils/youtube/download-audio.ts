@@ -1,7 +1,10 @@
-import { YoutubeDlAudioOptions } from './types';
 import { youtubeDownload } from './utils/download';
+import { YoutubeDlAudioOptions, YoutubeDlReturn } from './types';
 
-export function downloadAudio(url: string, options: YoutubeDlAudioOptions) {
+export function downloadAudio(
+  url: string,
+  options: YoutubeDlAudioOptions
+): YoutubeDlReturn | undefined {
   const args = [
     '--extract-audio',
     '--audio-quality',
@@ -11,7 +14,7 @@ export function downloadAudio(url: string, options: YoutubeDlAudioOptions) {
     url,
   ];
 
-  youtubeDownload({
+  return youtubeDownload({
     args,
     outputFolder: options.outputFolder,
     outputFile: options.outputFile,

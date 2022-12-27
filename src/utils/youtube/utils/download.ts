@@ -8,7 +8,7 @@ import { parseDestination } from '../parser/destination';
 import { parseDownload } from '../parser/download';
 import { parseDownloadWebsite } from '../parser/download-website';
 import { parseFfmpeg } from '../parser/ffmpeg';
-import { YoutubeDlOptions } from '../types';
+import { YoutubeDlOptions, YoutubeDlReturn } from '../types';
 import { getExePath } from './get-exe-path';
 
 export function youtubeDownload({
@@ -19,7 +19,7 @@ export function youtubeDownload({
   onUpdate,
   onError,
   onComplete,
-}: YoutubeDlOptions) {
+}: YoutubeDlOptions): YoutubeDlReturn | undefined {
   const exePath = getExePath();
   // console.log(`${basename(exePath)} ${args.join(' ')}`);
   try {
@@ -111,8 +111,15 @@ export function youtubeDownload({
         onError?.(String(e));
       }
     });
+
+    const stop = () => {
+      child.kill();
+    };
+
+    return { stop };
   } catch (e) {
     onError?.(String(e));
     console.error(e);
+    return undefined;
   }
 }

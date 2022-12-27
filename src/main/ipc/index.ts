@@ -174,7 +174,7 @@ export function setupMainIpc(mainWindow: BrowserWindow, catalogue: Catalogue) {
     }
 
     if (typedIpcMain.is(msg, 'removeDownload')) {
-      catalogue.removeDownload(msg.data.id);
+      catalogue.removeDownload(msg.data.id, msg.data.removeData);
     }
   });
 }

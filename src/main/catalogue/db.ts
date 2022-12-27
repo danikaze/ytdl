@@ -1,3 +1,4 @@
+import { unlink } from 'fs/promises';
 import { join } from 'path';
 import { nanoid } from '../../npm/nanoid';
 import { Download, DownloadState } from '../../interfaces/download';
@@ -106,8 +107,20 @@ export class CatalogueDb {
     });
   }
 
-  public removeDownload(id: Download['id']): void {
+  public async removeDownload(
+    id: Download['id'],
+    removeData: boolean
+  ): Promise<void> {
+    /* eslint-disable no-empty */
+    const dl = this.db.data.downloads[id];
     delete this.db.data.downloads[id];
     this.db.update({});
+    if (!removeData) return;
+    try {
+      await unlink(dl.temporalFile);
+    } catch {}
+    try {
+      await unlink(dl.outputFile);
+    } catch {}
   }
 }

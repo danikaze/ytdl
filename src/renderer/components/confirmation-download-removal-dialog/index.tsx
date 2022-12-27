@@ -1,22 +1,27 @@
-import { Dialog, Text } from 'evergreen-ui';
-import { useAppUi } from '@renderer/jotai/ui';
-import { useDownloads } from '@renderer/jotai/downloads';
+import { Checkbox, Dialog, Pane, Text } from 'evergreen-ui';
+import { useConfirmationDownloadRemovalDialog } from './hooks';
 
 export function ConfirmationDownloadRemovalDialog(): JSX.Element {
-  const { confirmDownloadId, setConfirmDownloadId } = useAppUi();
-  const { removeDownload } = useDownloads();
+  const { isShown, removeData, onConfirm, onClose, onCheckboxUpdate } =
+    useConfirmationDownloadRemovalDialog();
 
   return (
     <Dialog
-      isShown={confirmDownloadId !== undefined}
+      isShown={isShown}
       title="Remove download"
-      onCloseComplete={() => setConfirmDownloadId(undefined)}
-      onConfirm={() => {
-        removeDownload(confirmDownloadId!);
-        setConfirmDownloadId(undefined);
-      }}
+      onCloseComplete={onClose}
+      onConfirm={onConfirm}
     >
-      <Text>Do you want to remove the download?</Text>
+      <Pane>
+        <Text>Do you want to remove the download from the library?</Text>
+      </Pane>
+      <Pane>
+        <Checkbox
+          label="Remove data from disk too"
+          checked={removeData}
+          onChange={onCheckboxUpdate}
+        />
+      </Pane>
     </Dialog>
   );
 }

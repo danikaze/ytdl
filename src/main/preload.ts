@@ -158,9 +158,10 @@ const exposedYtdl = {
     });
   },
 
-  removeDownload: (id: Download['id']): void => {
+  removeDownload: (id: Download['id'], removeData: boolean): void => {
     const msg = typedIpcRenderer.createMessage('ytdl', 'removeDownload', {
       id,
+      removeData,
     });
     msg.send();
   },

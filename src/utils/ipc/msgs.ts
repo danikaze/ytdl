@@ -52,5 +52,8 @@ export interface IpcMessagesData {
   prepareImage: ImageToPrepare;
   prepareImageResult: ImageToPrepareResult;
   confirmDownloadRemoval: Pick<Download, 'id'>;
-  removeDownload: Pick<Download, 'id'>;
+  removeDownload: {
+    id: Download['id'];
+    removeData: boolean;
+  };
 }

@@ -63,7 +63,9 @@ export function setupMainIpc(mainWindow: BrowserWindow, catalogue: Catalogue) {
         const data = await fetchMetadata(msg.data.url);
         msg.reply('fetchMetadataResult', data);
       } catch (error) {
-        msg.reply('ytdlError', String(error));
+        msg.reply('fetchMetadataError', {
+          error: String(error),
+        });
       }
     }
 

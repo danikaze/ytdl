@@ -14,6 +14,10 @@ import {
 import { Settings } from '@interfaces/settings';
 
 export interface IpcMessagesData {
+  requestIpcMsg: {
+    type: keyof IpcMessagesData;
+    data: IpcMessagesData[keyof IpcMessagesData];
+  };
   changeScreen: {
     screen: AppScreen;
   };
@@ -52,6 +56,8 @@ export interface IpcMessagesData {
   prepareImage: ImageToPrepare;
   prepareImageResult: ImageToPrepareResult;
   confirmDownloadRemoval: Pick<Download, 'id'>;
+  resumeDownload: Pick<Download, 'id'>;
+  stopDownload: Pick<Download, 'id'>;
   removeDownload: {
     id: Download['id'];
     removeData: boolean;

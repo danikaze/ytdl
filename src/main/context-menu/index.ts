@@ -4,6 +4,7 @@ import {
   MenuItem,
   MenuItemConstructorOptions,
 } from 'electron';
+import type { Catalogue } from '../catalogue';
 import { addDevContextMenuOptions } from './dev';
 import {
   createDownloadItemContextMenu,
@@ -25,11 +26,12 @@ export type ContextMenuData = {} | DownloadItemContextMenuData;
  * Factory function to create context menus in the application
  */
 export function openContextMenu(
+  catalogue: Catalogue,
   context: ContextMenuContext,
   data: ContextMenuData
 ): void {
   const template: ContextMenuTemplate = isDownloadItemContext(data)
-    ? createDownloadItemContextMenu(data)
+    ? createDownloadItemContextMenu(catalogue, data)
     : [];
 
   addDevContextMenuOptions(context, template);

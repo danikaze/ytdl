@@ -18,6 +18,16 @@ export function setupRendererIpc({
   ui,
 }: Options) {
   typedIpcRenderer.on({ channel: 'ytdl' }, async (msg) => {
+    if (typedIpcRenderer.is(msg, 'requestIpcMsg')) {
+      const reply = typedIpcRenderer.createMessage(
+        'ytdl',
+        msg.data.type,
+        msg.data.data
+      );
+      reply.send();
+      reply.end();
+    }
+
     if (typedIpcRenderer.is(msg, 'changeScreen')) {
       setScreen('settings');
     }

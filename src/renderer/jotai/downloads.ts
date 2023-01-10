@@ -72,6 +72,7 @@ export function useDownloads() {
   return {
     initDownloads,
     removeDownload,
+    updateDownload,
     downloadList: downloads as Readonly<Download[]>,
     downloadAudio: addAudioDownload,
     downloadVideo: addVideoDownload,

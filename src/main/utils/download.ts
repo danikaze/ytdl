@@ -1,5 +1,6 @@
 import { Download, DownloadState } from '../../interfaces/download';
 import { processAudio } from '../../utils/audio';
+import { typedIpcMain } from '../../utils/ipc';
 import { IpcMessagesData } from '../../utils/ipc/msgs';
 import { IpcMainIncomingMessage } from '../../utils/ipc/private/main-message';
 import { downloadAudio } from '../../utils/youtube/download-audio';
@@ -122,6 +123,13 @@ function getYtdlUpdate(catalogue: Catalogue, msg: StartDownloadOptions['msg']) {
     data: Pick<Download, 'id'> & Nullable<Partial<Omit<Download, 'id'>>>
   ) => {
     catalogue.updateDownload(data);
-    msg.reply('ytdlUpdate', data);
+    const reply = typedIpcMain.createMessage(
+      'main',
+      msg.channel,
+      'ytdlUpdate',
+      data
+    );
+    reply.send();
+    reply.end();
   };
 }

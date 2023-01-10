@@ -102,8 +102,8 @@ const exposedYtdl = {
       });
 
       msg.onReply((response) => {
-        if (typedIpcRenderer.is(response, 'ytdlError')) {
-          reject(response.data);
+        if (typedIpcRenderer.is(response, 'fetchMetadataError')) {
+          reject(response.data.error);
         }
 
         if (typedIpcRenderer.is(response, 'fetchMetadataResult')) {

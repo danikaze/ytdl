@@ -43,9 +43,9 @@ export interface IpcMessagesData {
     url: string;
   };
   fetchMetadataResult: YoutubeDlMetadata;
+  fetchMetadataError: { error: string };
   ytdlStart: Download;
   ytdlUpdate: Pick<Download, 'id'> & Nullable<Partial<Omit<Download, 'id'>>>;
-  ytdlError: string;
   pickPath: OpenDialogOptions;
   pickPathResult: string[] | undefined;
   initApp: {

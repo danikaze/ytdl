@@ -18,7 +18,7 @@ export function App(): JSX.Element {
   const { screen, setScreen } = useAppScreen();
   const ui = useAppUi();
   const { setSettings } = useSettings();
-  const { initDownloads } = useDownloads();
+  const { initDownloads, updateDownload } = useDownloads();
   const theme = lightTheme;
 
   useEffect(() => {
@@ -28,8 +28,14 @@ export function App(): JSX.Element {
   }, []);
 
   useEffect(() => {
-    window.ytdl.setupIpc({ setScreen, setSettings, initDownloads, ui });
-  }, [setScreen, setSettings, initDownloads, ui]);
+    window.ytdl.setupIpc({
+      setScreen,
+      setSettings,
+      initDownloads,
+      updateDownload,
+      ui,
+    });
+  }, [setScreen, setSettings, initDownloads, updateDownload, ui]);
 
   useEffect(() => {
     setThemeGlobals(theme);

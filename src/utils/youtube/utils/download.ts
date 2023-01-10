@@ -11,6 +11,8 @@ import { parseFfmpeg } from '../parser/ffmpeg';
 import { YoutubeDlOptions, YoutubeDlReturn } from '../types';
 import { getExePath } from './get-exe-path';
 
+const STOP_SIGNAL: NodeJS.Signals = 'SIGINT';
+
 export function youtubeDownload({
   args,
   outputFolder,
@@ -82,9 +84,14 @@ export function youtubeDownload({
       onError?.(data);
     });
 
-    child.on('close', (code) => {
+    child.on('exit', (code, signal) => {
       try {
-        console.log('[close]', code);
+        console.log('[exit]', code, signal);
+
+        if (signal === STOP_SIGNAL) {
+          onUpdate?.({ state: DownloadState.PAUSED });
+          return;
+        }
 
         if (temporalFolder) {
           const finalOutputPath = join(
@@ -113,7 +120,7 @@ export function youtubeDownload({
     });
 
     const stop = () => {
-      child.kill();
+      child.kill(STOP_SIGNAL);
     };
 
     return { stop };

@@ -24,6 +24,7 @@ export interface Download {
   downloadPctg: number;
   temporalFile: string;
   outputFile: string;
+  outputFolder: string;
   size?: string;
   speed?: number;
   eta?: number;

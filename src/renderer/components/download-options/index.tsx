@@ -1,29 +1,27 @@
 import { useCallback } from 'react';
 import { Dialog, Pane } from 'evergreen-ui';
 import { useDownloadOptions } from '@renderer/jotai/download-options';
-import { useDownloads } from '@renderer/jotai/downloads';
 import { DownloadOptionsInfo } from '../download-options-info';
 import { DownloadOptionsInput } from '../download-options-input';
 
 export function DownloadOptions(): JSX.Element {
   const modal = useDownloadOptions();
-  const { downloadAudio, downloadVideo } = useDownloads();
 
   const startDownload = useCallback(() => {
     if (modal.downloadType === 'audio') {
-      downloadAudio(modal.url, {
+      window.ytdl.downloadAudio(modal.url, {
         ...modal.downloadOptions,
         ...modal.downloadAudioOptions,
         postProcess: modal.postProcess,
       });
     } else {
-      downloadVideo(modal.url, {
+      window.ytdl.downloadVideo(modal.url, {
         ...modal.downloadOptions,
         ...modal.downloadVideoOptions,
       });
     }
     modal.close();
-  }, [downloadAudio, downloadVideo, modal]);
+  }, [modal]);
 
   return (
     <Dialog

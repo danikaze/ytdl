@@ -12,7 +12,7 @@ export interface Props {
   disabled?: boolean;
   dialogOptions: OpenDialogOptions;
   defaultValue?: string;
-  onChange?: (path: readonly string[] | undefined) => void;
+  onChange?: (path: readonly string[] | false) => void;
   fullWidth?: boolean;
   className?: string;
 }

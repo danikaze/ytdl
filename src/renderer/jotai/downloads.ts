@@ -1,11 +1,6 @@
 import { atom, useAtom } from 'jotai';
 import { Download } from '@interfaces/download';
 import { assignDeepWithDelete } from '@utils/assign-deep';
-import {
-  DownloadAudioOptions,
-  DownloadOptions,
-  DownloadVideoOptions,
-} from '@main/preload';
 import { removeFromArrayAndCopy } from '@utils/remove-from-array';
 
 const rawDownloads = atom<Download[]>([]);
@@ -18,7 +13,10 @@ export function useDownloads() {
   }
 
   function addDownload(download: Download) {
-    setDownloads((dls) => [...dls, download]);
+    setDownloads((dls) => {
+      if (dls.find((d) => d.id === download.id)) return dls;
+      return [...dls, download];
+    });
   }
 
   function updateDownload(
@@ -38,43 +36,11 @@ export function useDownloads() {
     window.ytdl.removeDownload(id, removeData);
   }
 
-  function getDownloadCallbacks(): Pick<
-    DownloadOptions,
-    'onStart' | 'onUpdate'
-  > {
-    let id: Download['id'];
-    return {
-      onStart: (download) => {
-        id = download.id!;
-        addDownload(download as Download);
-      },
-      onUpdate: (update) => {
-        // console.log('[onUpdate]', update);
-        updateDownload(id, update);
-      },
-    };
-  }
-
-  function addAudioDownload(url: string, options: DownloadAudioOptions) {
-    window.ytdl.downloadAudio(url, {
-      ...options,
-      ...getDownloadCallbacks(),
-    });
-  }
-
-  function addVideoDownload(url: string, options: DownloadVideoOptions) {
-    window.ytdl.downloadVideo(url, {
-      ...options,
-      ...getDownloadCallbacks(),
-    });
-  }
-
   return {
     initDownloads,
-    removeDownload,
+    addDownload,
     updateDownload,
+    removeDownload,
     downloadList: downloads as Readonly<Download[]>,
-    downloadAudio: addAudioDownload,
-    downloadVideo: addVideoDownload,
   };
 }

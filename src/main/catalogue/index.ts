@@ -43,7 +43,7 @@ export class Catalogue {
   }
 
   public addDownload(
-    download: Pick<Download, 'url' | 'postProcess' | 'format'>
+    download: Pick<Download, 'type' | 'url' | 'postProcess' | 'format'>
   ): Download['id'] {
     return this.db.addDownload(download);
   }

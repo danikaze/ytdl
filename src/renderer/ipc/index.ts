@@ -1,54 +1,56 @@
 import { AppScreen } from '@interfaces/app';
-import { Download } from '@interfaces/download';
 import { Settings } from '@interfaces/settings';
+import type { useDownloads } from '@renderer/jotai/downloads';
 import { typedIpcRenderer } from '@utils/ipc';
 import type { AppUiApi } from '@renderer/jotai/ui';
 
 interface Options {
   setScreen: (screen: AppScreen) => void;
   setSettings: (settings: Settings) => void;
-  initDownloads: (downloads: readonly Download[]) => void;
-  updateDownload: (
-    id: Download['id'],
-    value: Partial<DeepNullable<Omit<Download, 'id'>>>
-  ) => void;
+  downloads: ReturnType<typeof useDownloads>;
   ui: AppUiApi;
 }
 
 export function setupRendererIpc({
   setScreen,
   setSettings,
-  initDownloads,
-  updateDownload,
+  downloads,
   ui,
 }: Options) {
-  typedIpcRenderer.on({ channel: 'ytdl' }, async (msg) => {
-    if (typedIpcRenderer.is(msg, 'requestIpcMsg')) {
-      const reply = typedIpcRenderer.createMessage(
-        'ytdl',
-        msg.data.type,
-        msg.data.data
-      );
-      reply.send();
-      reply.end();
-    }
+  typedIpcRenderer.removeAllListeners('triggerIpcCommand');
+  typedIpcRenderer.on('triggerIpcCommand', (ev, { command, args }) => {
+    typedIpcRenderer.invoke(command, ...args);
+  });
 
-    if (typedIpcRenderer.is(msg, 'changeScreen')) {
-      setScreen('settings');
-    }
+  typedIpcRenderer.removeAllListeners('triggerIpcEvent');
+  typedIpcRenderer.on('triggerIpcEvent', (ev, { event, args }) => {
+    typedIpcRenderer.send(event, ...args);
+  });
 
-    if (typedIpcRenderer.is(msg, 'initApp')) {
-      setSettings(msg.data.settings);
-      initDownloads(msg.data.downloads);
-      setScreen('downloads');
-    }
+  typedIpcRenderer.removeAllListeners('confirmDownloadRemoval');
+  typedIpcRenderer.on('confirmDownloadRemoval', (ev, id) => {
+    ui.setConfirmDownloadId(id);
+  });
 
-    if (typedIpcRenderer.is(msg, 'confirmDownloadRemoval')) {
-      ui.setConfirmDownloadId(msg.data.id);
-    }
+  typedIpcRenderer.removeAllListeners('changeScreen');
+  typedIpcRenderer.on('changeScreen', (ev, screen) => {
+    setScreen(screen);
+  });
 
-    if (typedIpcRenderer.is(msg, 'ytdlUpdate')) {
-      updateDownload(msg.data.id, msg.data);
-    }
+  typedIpcRenderer.removeAllListeners('initApp');
+  typedIpcRenderer.on('initApp', (ev, data) => {
+    setSettings(data.settings);
+    downloads.initDownloads(data.downloads);
+    setScreen('downloads');
+  });
+
+  typedIpcRenderer.removeAllListeners('ytdlStart');
+  typedIpcRenderer.on('ytdlStart', (ev, data) => {
+    downloads.addDownload(data);
+  });
+
+  typedIpcRenderer.removeAllListeners('ytdlUpdate');
+  typedIpcRenderer.on('ytdlUpdate', (ev, data) => {
+    downloads.updateDownload(data.id, data);
   });
 }

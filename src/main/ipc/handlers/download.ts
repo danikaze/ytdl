@@ -1,39 +1,35 @@
-import { Download, DownloadState } from '../../interfaces/download';
-import { processAudio } from '../../utils/audio';
-import { typedIpcMain } from '../../utils/ipc';
-import { IpcMessagesData } from '../../utils/ipc/msgs';
-import { IpcMainIncomingMessage } from '../../utils/ipc/private/main-message';
-import { downloadAudio } from '../../utils/youtube/download-audio';
-import { downloadVideo } from '../../utils/youtube/download-video';
+import { Catalogue } from '../../catalogue';
+import { Download, DownloadState } from '../../../interfaces/download';
+import { processAudio } from '../../../utils/audio';
+import { ipcToWindow } from '../../../utils/ipc';
+import { IpcCommands } from '../../../utils/ipc/commands';
+import { downloadAudio } from '../../../utils/youtube/download-audio';
+import { downloadVideo } from '../../../utils/youtube/download-video';
 import {
   YoutubeDlAudioOptions,
-  YoutubeDlVideoOptions,
-  YoutubeDlStateUpdate,
   YoutubeDlReturn,
-} from '../../utils/youtube/types';
-import { Catalogue } from '../catalogue';
+  YoutubeDlStateUpdate,
+  YoutubeDlVideoOptions,
+} from '../../../utils/youtube/types';
 
-export interface StartDownloadOptions {
-  id: Download['id'];
-  catalogue: Catalogue;
-  youtubeDownloads: Map<Download['id'], YoutubeDlReturn>;
-  msg: IpcMainIncomingMessage<
-    'main',
-    'ytdl',
-    IpcMessagesData,
-    'downloadAudio' | 'downloadVideo' | 'resumeDownload'
-  >;
-}
-
-type StartDownloadData =
-  | IpcMessagesData['downloadAudio']
-  | IpcMessagesData['downloadVideo'];
-
-export function startDownload(
-  { id, catalogue, youtubeDownloads, msg }: StartDownloadOptions,
-  data: StartDownloadData
-) {
-  const ytdlUpdate = getYtdlUpdate(catalogue, msg);
+export async function downloadAudioOrVideo<
+  T extends 'downloadAudio' | 'downloadVideo'
+>(
+  youtubeDownloads: Map<Download['id'], YoutubeDlReturn>,
+  type: T,
+  catalogue: Catalogue,
+  data: Parameters<IpcCommands[T]>[0],
+  downloadId?: Download['id']
+): Promise<void> {
+  const id =
+    downloadId ||
+    catalogue.addDownload({
+      type: type === 'downloadAudio' ? 'audio' : 'video',
+      url: data.url,
+      postProcess: data.postProcess || {},
+      format: data.format,
+    });
+  const ytdlUpdate = getYtdlUpdate(catalogue);
 
   const options: YoutubeDlAudioOptions | YoutubeDlVideoOptions = {
     outputFolder: data.outputFolder,
@@ -41,10 +37,9 @@ export function startDownload(
     format: data.format,
     onStart: async ({ temporalFile }) => {
       catalogue.updateDownload({ id, temporalFile });
-      msg.reply('ytdlStart', catalogue.getDownload(id)!);
+      ipcToWindow('main', 'ytdlStart', catalogue.getDownload(id)!);
     },
     onComplete: async (exitCode, downloadPath) => {
-      youtubeDownloads.delete(id);
       if (exitCode) {
         ytdlUpdate({
           id,
@@ -55,7 +50,7 @@ export function startDownload(
         return;
       }
 
-      if (isDownloadAudio(data)) {
+      if (isAudio(type, data)) {
         if (data.format === 'mp3' && data.postProcess?.audio) {
           ytdlUpdate({ id, state: DownloadState.PROCESSING });
           try {
@@ -76,7 +71,6 @@ export function startDownload(
         speed: null,
         eta: null,
       });
-      msg.end();
     },
     onUpdate: (update) => {
       ytdlUpdate({
@@ -102,34 +96,41 @@ export function startDownload(
     },
   };
 
-  const dl = isDownloadAudio(data)
+  const dl = isAudio(type, data)
     ? downloadAudio(data.url, options as YoutubeDlAudioOptions)
     : downloadVideo(data.url, options as YoutubeDlVideoOptions);
+
   if (dl) {
     youtubeDownloads.set(id, dl);
   }
 }
 
-function isDownloadAudio(
-  data: StartDownloadData
-): data is IpcMessagesData['downloadAudio'] {
-  return (
-    (data as IpcMessagesData['downloadAudio']).postProcess?.audio !== undefined
-  );
+export function stopDownload(
+  youtubeDownloads: Map<Download['id'], YoutubeDlReturn>,
+  catalogue: Catalogue,
+  id: Download['id']
+): void {
+  catalogue.updateDownload({ id, state: DownloadState.PAUSED });
+
+  const dl = youtubeDownloads.get(id);
+  if (dl) {
+    dl.stop();
+    youtubeDownloads.delete(id);
+  }
 }
 
-function getYtdlUpdate(catalogue: Catalogue, msg: StartDownloadOptions['msg']) {
+function getYtdlUpdate(catalogue: Catalogue) {
   return (
     data: Pick<Download, 'id'> & Nullable<Partial<Omit<Download, 'id'>>>
   ) => {
     catalogue.updateDownload(data);
-    const reply = typedIpcMain.createMessage(
-      'main',
-      msg.channel,
-      'ytdlUpdate',
-      data
-    );
-    reply.send();
-    reply.end();
+    ipcToWindow('main', 'ytdlUpdate', data);
   };
+}
+
+function isAudio(
+  type: 'downloadAudio' | 'downloadVideo',
+  data: Parameters<IpcCommands['downloadAudio' | 'downloadVideo']>[0]
+): data is Parameters<IpcCommands['downloadAudio']>[0] {
+  return type === 'downloadAudio';
 }

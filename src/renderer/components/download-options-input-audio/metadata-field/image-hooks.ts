@@ -1,9 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useDownloadOptions } from '@renderer/jotai/download-options';
-import {
-  ImageToPrepareResult,
-  ImageToPrepareResultError,
-} from '@interfaces/download';
 import type { Props } from './image';
 
 type MetadataImageFieldState = 'waiting' | 'none' | 'url' | 'file';
@@ -31,8 +27,8 @@ export function useMetadataFieldImage({ field, onChange }: Props) {
         path || metadata.thumbnail,
         metadata.id
       );
-      if (isImageResultError(res)) {
-        setError(res.error);
+      if (typeof res === 'string') {
+        setError(res);
         setValue(undefined);
         setImageUrl(undefined);
       } else {
@@ -71,10 +67,4 @@ export function useMetadataFieldImage({ field, onChange }: Props) {
     useFile,
     selectFile,
   };
-}
-
-function isImageResultError(
-  res: ImageToPrepareResult
-): res is ImageToPrepareResultError {
-  return (res as ImageToPrepareResultError).error !== undefined;
 }

@@ -5,12 +5,12 @@ import { Settings } from '@interfaces/settings';
 export function useDownloadSettings() {
   const { getSetting, updateSetting } = useSettings();
 
-  function updateDownloadsFolder(paths: readonly string[] | undefined): void {
+  function updateDownloadsFolder(paths: readonly string[] | false): void {
     if (!paths) return;
     updateSetting('downloads.downloadFolder', paths[0]);
   }
 
-  function updateTemporalFolder(paths: readonly string[] | undefined): void {
+  function updateTemporalFolder(paths: readonly string[] | false): void {
     if (!paths) return;
     updateSetting('downloads.temporalFolder', paths[0]);
   }

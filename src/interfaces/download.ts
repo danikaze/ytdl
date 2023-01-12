@@ -4,6 +4,7 @@ import {
   YoutubeDlVideoFormat,
 } from '@utils/youtube/types';
 import type { Tags } from 'node-id3';
+import { DownloadType } from './settings';
 
 export const enum DownloadState {
   INITIALIZATING,
@@ -18,6 +19,7 @@ export const enum DownloadState {
 
 export interface Download {
   id: string;
+  type: DownloadType;
   format: YoutubeDlAudioFormat | YoutubeDlVideoFormat;
   state: DownloadState;
   url: string;
@@ -60,16 +62,9 @@ export interface ImageToPrepare {
   videoId: YoutubeDlMetadata['id'];
 }
 
-export type ImageToPrepareResult =
-  | ImageToPrepareResultOk
-  | ImageToPrepareResultError;
-export interface ImageToPrepareResultOk {
+export interface ImageToPrepareResult {
   // path to use for the metadata
   path: string;
   // url to use for the preview
   url: string;
-}
-
-export interface ImageToPrepareResultError {
-  error: string;
 }

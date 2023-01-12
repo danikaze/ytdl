@@ -15,7 +15,7 @@ import log from 'electron-log';
 import { fileURLToPath } from 'url';
 import MenuBuilder from './menu';
 import { THUMB_TEMP_PATH } from '../utils/constants';
-import { typedIpcMain } from '../utils/ipc';
+import { ipcToWindow, registerIpcTarget } from '../utils/ipc';
 import { resolveHtmlPath } from './utils/resolve-html-path';
 import { setupMainIpc } from './ipc';
 import { mainSettings } from './settings';
@@ -83,7 +83,8 @@ const createWindow = async () => {
         : path.join(__dirname, '../../.erb/dll/preload.js'),
     },
   });
-  setupMainIpc(mainWindow, catalogue);
+  registerIpcTarget('main', mainWindow);
+  setupMainIpc(catalogue);
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
   mainWindow.on('ready-to-show', async () => {
@@ -100,12 +101,10 @@ const createWindow = async () => {
   mainWindow.webContents.on('did-finish-load', async () => {
     const settings = await mainSettings.load();
     const downloads = catalogue.getAllDownloads();
-    const initApp = typedIpcMain.createMessage('main', 'ytdl', 'initApp', {
+    ipcToWindow('main', 'initApp', {
       settings,
       downloads,
     });
-    initApp.send();
-    initApp.end();
   });
 
   mainWindow.on('closed', () => {

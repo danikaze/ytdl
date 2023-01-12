@@ -1,6 +1,6 @@
 import { MenuItemConstructorOptions } from 'electron';
 import { Download, DownloadState } from '../../interfaces/download';
-import { typedIpcMain } from '../../utils/ipc';
+import { ipcToWindow } from '../../utils/ipc';
 import type { Catalogue } from '../catalogue';
 import type { ContextMenuTemplate } from '.';
 
@@ -27,16 +27,7 @@ export function createDownloadItemContextMenu(
     {
       label: 'Remove',
       click: () => {
-        const msg = typedIpcMain.createMessage(
-          'main',
-          'ytdl',
-          'confirmDownloadRemoval',
-          {
-            id: data.id,
-          }
-        );
-        msg.send();
-        msg.end();
+        ipcToWindow('main', 'confirmDownloadRemoval', data.id);
       },
     },
   ];
@@ -50,19 +41,10 @@ function getStopResumeMenu(download: Download): MenuItemConstructorOptions[] {
         click: () => {
           if (!isStopped(download)) return;
 
-          const msg = typedIpcMain.createMessage(
-            'main',
-            'ytdl',
-            'requestIpcMsg',
-            {
-              type: 'resumeDownload',
-              data: {
-                id: download.id,
-              },
-            }
-          );
-          msg.send();
-          msg.end();
+          ipcToWindow('main', 'triggerIpcCommand', {
+            command: 'resumeDownload',
+            args: [download.id],
+          });
         },
       },
     ];
@@ -75,19 +57,10 @@ function getStopResumeMenu(download: Download): MenuItemConstructorOptions[] {
         click: () => {
           if (!isDownloading(download)) return;
 
-          const msg = typedIpcMain.createMessage(
-            'main',
-            'ytdl',
-            'requestIpcMsg',
-            {
-              type: 'stopDownload',
-              data: {
-                id: download.id,
-              },
-            }
-          );
-          msg.send();
-          msg.end();
+          ipcToWindow('main', 'triggerIpcCommand', {
+            command: 'stopDownload',
+            args: [download.id],
+          });
         },
       },
     ];

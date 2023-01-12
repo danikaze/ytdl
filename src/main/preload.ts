@@ -6,23 +6,19 @@ import {
   ImageToPrepareResult,
 } from '@interfaces/download';
 import { setupRendererIpc } from '@renderer/ipc';
-import { typedIpcRenderer } from '../utils/ipc';
-import type { IpcMessagesData } from '../utils/ipc/msgs';
+import { IpcCommands } from '@utils/ipc/commands';
+import { typedIpcRenderer } from '@utils/ipc';
 import {
   YoutubeDlAudioFormat,
   YoutubeDlMetadata,
   YoutubeDlVideoFormat,
-} from '../utils/youtube/types';
+} from '@utils/youtube/types';
 
 export type ElectronYtdl = typeof exposedYtdl;
 
 export type DownloadOptions = {
   outputFolder: string;
   outputFile: string;
-  onStart?: (download: Download) => void;
-  onUpdate?: (
-    download: Pick<Download, 'id'> & Nullable<Partial<Omit<Download, 'id'>>>
-  ) => void;
 };
 
 export type DownloadAudioOptions = DownloadOptions & {
@@ -35,136 +31,61 @@ export type DownloadVideoOptions = DownloadOptions & {
 };
 
 const exposedYtdl = {
-  setupIpc: setupRendererIpc,
+  setupRendererIpc,
 
-  openContextMenu: (props: IpcMessagesData['openContextMenu']) => {
-    const msg = typedIpcRenderer.createMessage(
-      'ytdl',
-      'openContextMenu',
-      props
-    );
-    msg.send();
-    msg.end();
-  },
+  openContextMenu: (...props: Parameters<IpcCommands['openContextMenu']>) =>
+    typedIpcRenderer.invoke('openContextMenu', ...props),
 
-  downloadAudio: (url: string, options: DownloadAudioOptions) => {
-    const msg = typedIpcRenderer.createMessage('ytdl', 'downloadAudio', {
+  downloadAudio: (url: string, options: DownloadAudioOptions) =>
+    typedIpcRenderer.invoke('downloadAudio', {
       url,
       outputFolder: options.outputFolder,
       outputFile: options.outputFile,
       format: options.format || 'mp3',
       postProcess: options.postProcess,
-    });
+    }),
 
-    msg.onReply((response) => {
-      if (typedIpcRenderer.is(response, 'ytdlStart')) {
-        options.onStart?.(response.data);
-        return;
-      }
-
-      if (typedIpcRenderer.is(response, 'ytdlUpdate')) {
-        options.onUpdate?.(response.data);
-        // return;
-      }
-    });
-
-    msg.send();
-  },
-
-  downloadVideo: (url: string, options: DownloadVideoOptions) => {
-    const msg = typedIpcRenderer.createMessage('ytdl', 'downloadVideo', {
+  downloadVideo: (url: string, options: DownloadVideoOptions) =>
+    typedIpcRenderer.invoke('downloadVideo', {
       url,
       outputFolder: options.outputFolder,
       outputFile: options.outputFile,
       format: options.format || 'best',
       postProcess: {},
-    });
+    }),
 
-    msg.onReply((response) => {
-      if (typedIpcRenderer.is(response, 'ytdlStart')) {
-        options.onStart?.(response.data);
-        return;
-      }
+  fetchMetadata: async (url: string): Promise<YoutubeDlMetadata> => {
+    const res = await typedIpcRenderer.invoke('fetchMetadata', url);
 
-      if (typedIpcRenderer.is(response, 'ytdlUpdate')) {
-        options.onUpdate?.(response.data);
-        // return;
-      }
-    });
+    if (typeof res === 'string') {
+      throw new Error(res);
+    }
 
-    msg.send();
+    return res;
   },
 
-  fetchMetadata: (url: string): Promise<YoutubeDlMetadata> => {
-    return new Promise<YoutubeDlMetadata>((resolve, reject) => {
-      const msg = typedIpcRenderer.createMessage('ytdl', 'fetchMetadata', {
-        url,
-      });
-
-      msg.onReply((response) => {
-        if (typedIpcRenderer.is(response, 'fetchMetadataError')) {
-          reject(response.data.error);
-        }
-
-        if (typedIpcRenderer.is(response, 'fetchMetadataResult')) {
-          resolve(response.data);
-        }
-      });
-
-      msg.send();
-    });
-  },
-
-  pickFile: (dialogOptions: OpenDialogOptions) => {
-    return new Promise<readonly string[] | undefined>((resolve) => {
-      const msg = typedIpcRenderer.createMessage(
-        'ytdl',
-        'pickPath',
-        dialogOptions
-      );
-      msg.onReply((reply) => {
-        if (typedIpcRenderer.is(reply, 'pickPathResult')) {
-          resolve(reply.data);
-        }
-      });
-      msg.send();
-    });
-  },
+  pickFile: async (dialogOptions: OpenDialogOptions) =>
+    typedIpcRenderer.invoke('pickPath', dialogOptions),
 
   updateSetting: <K extends keyof Settings>(key: K, value: Settings[K]) => {
-    const msg = typedIpcRenderer.createMessage('ytdl', 'updateSettings', {
+    typedIpcRenderer.invoke('updateSettings', {
       [key]: value,
     });
-    msg.send();
   },
 
-  prepareImage: (
+  prepareImage: async (
     from: 'file' | 'url',
     path: string,
     videoId: YoutubeDlMetadata['id']
-  ): Promise<ImageToPrepareResult> => {
-    return new Promise<ImageToPrepareResult>((resolve) => {
-      const msg = typedIpcRenderer.createMessage('ytdl', 'prepareImage', {
-        from,
-        path,
-        videoId,
-      });
-      msg.onReply((reply) => {
-        if (typedIpcRenderer.is(reply, 'prepareImageResult')) {
-          resolve(reply.data);
-        }
-      });
-      msg.send();
-    });
-  },
+  ): Promise<ImageToPrepareResult | string> =>
+    typedIpcRenderer.invoke('prepareImage', {
+      from,
+      path,
+      videoId,
+    }),
 
-  removeDownload: (id: Download['id'], removeData: boolean): void => {
-    const msg = typedIpcRenderer.createMessage('ytdl', 'removeDownload', {
-      id,
-      removeData,
-    });
-    msg.send();
-  },
+  removeDownload: (id: Download['id'], removeData: boolean): Promise<void> =>
+    typedIpcRenderer.invoke('removeDownload', id, removeData),
 };
 
 contextBridge.exposeInMainWorld('ytdl', exposedYtdl);
